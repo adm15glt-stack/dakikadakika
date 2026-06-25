@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DakikaDakika Teknoloji - güncel teknoloji haberleri, yapay zeka, mobil, oyun, otomobil ve güvenlik gelişmeleri." />
+  <title>DakikaDakika Teknoloji</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root {
+      --accent: #145fe8;
+      --accent-dark: #0f48b3;
+      --accent-soft: rgba(20, 95, 232, 0.1);
+      --bg: #eef3f8;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fd;
+      --border: #dce5f1;
+      --text: #101828;
+      --text-soft: #475467;
+      --muted: #8a9bb1;
+      --shadow: 0 12px 34px rgba(16, 24, 40, 0.09);
+      --radius: 8px;
+      --header-height: 64px;
+      --nav-height: 52px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.modal-open { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: -44px;
+      z-index: 999;
+      background: var(--text);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      transition: top 0.2s ease;
+    }
+    .skip-link:focus { top: 12px; }
+
+    .ticker {
+      overflow: hidden;
+      background: var(--accent);
+      color: #fff;
+      white-space: nowrap;
+    }
+    .ticker-track {
+      display: inline-flex;
+      gap: 46px;
+      min-width: max-content;
+      padding: 7px 0;
+      animation: ticker 34s linear infinite;
+    }
+    .ticker-track span {
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .ticker-track span::before {
+      content: "\f0e7";
+      margin-right: 8px;
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track { animation: none; }
+      * { scroll-behavior: auto !important; }
+    }
+
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 22px;
+      background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #d9e8ff;
+      box-shadow: 0 8px 20px rgba(20, 95, 232, 0.16);
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+      min-width: 0;
+    }
+    .brand-name {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(17px, 2vw, 21px);
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .brand-subtitle {
+      color: var(--accent);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: min(330px, 34vw);
+      height: 38px;
+      padding: 0 8px 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      color: var(--muted);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .search:focus-within {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .icon-button:hover, .icon-button:focus-visible {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      outline: 0;
+    }
+
+    .main-nav {
+      position: sticky;
+      top: var(--header-height);
+      z-index: 45;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1240px;
+      height: var(--nav-height);
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .nav-link {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      padding: 8px 12px;
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .nav-link:hover { background: var(--surface-soft); color: var(--text); }
+    .nav-link.active { background: var(--accent-soft); color: var(--accent); }
+
+    .container {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+    .section {
+      padding-top: 30px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .section-head::before {
+      content: "";
+      width: 3px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .section-head h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+    .section-head .count {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 14px;
+    }
+    .hero-main, .side-card, .news-card, .list-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hero-main:hover, .side-card:hover, .news-card:hover, .list-card:hover {
+      border-color: rgba(20, 95, 232, 0.45);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .hero-main {
+      position: relative;
+      min-height: 360px;
+      overflow: hidden;
+      color: #fff;
+    }
+    .hero-main img {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      object-fit: cover;
+      transition: transform 0.45s ease;
+    }
+    .hero-main:hover img { transform: scale(1.03); }
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 28%, rgba(0, 0, 0, 0.32) 56%, rgba(0, 0, 0, 0.86));
+    }
+    .hero-content {
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 1;
+      padding: 28px;
+    }
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border-radius: 5px;
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .hero-content h1 {
+      max-width: 780px;
+      margin-top: 11px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(25px, 4.2vw, 42px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .side-stack {
+      display: grid;
+      gap: 10px;
+    }
+    .side-card, .list-card {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+    }
+    .side-card img, .list-card img {
+      width: 92px;
+      height: 72px;
+      border-radius: 7px;
+      object-fit: cover;
+      background: var(--surface-soft);
+    }
+    .small-tag {
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+    .side-card h3, .list-card h3 {
+      margin-top: 5px;
+      font-size: 13px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .news-card {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .news-card img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background: var(--surface-soft);
+    }
+    .news-card-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px;
+    }
+    .news-card h3 {
+      font-size: 15px;
+      line-height: 1.38;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta {
+      margin-top: auto;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .list-card {
+      align-items: start;
+      grid-template-columns: 112px minmax(0, 1fr);
+      padding: 12px;
+    }
+    .list-card img {
+      width: 112px;
+      height: 84px;
+    }
+    .list-card p {
+      margin-top: 6px;
+      color: var(--text-soft);
+      font-size: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 34px 18px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--text-soft);
+      text-align: center;
+      font-weight: 700;
+    }
+    .empty-state.active { display: block; }
+
+    footer {
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+    .footer-inner {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 24px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 32px;
+    }
+    .footer-brand p {
+      max-width: 440px;
+      margin-top: 12px;
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+    .footer-col h4 {
+      margin-bottom: 12px;
+      color: var(--text-soft);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li + li { margin-top: 8px; }
+    .footer-col a {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      background: rgba(16, 24, 40, 0.52);
+      backdrop-filter: blur(4px);
+    }
+    .overlay.active { display: block; }
+    .modal {
+      width: min(760px, calc(100% - 32px));
+      max-height: calc(100vh - 40px);
+      margin: 20px auto;
+      overflow: auto;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+    }
+    .modal-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+    }
+    .text-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      color: var(--text-soft);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .text-button:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-image {
+      width: 100%;
+      height: min(360px, 45vh);
+      object-fit: cover;
+      background: var(--surface-soft);
+    }
+    .modal-body { padding: 24px 28px 34px; }
+    .modal-title {
+      margin-top: 13px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.15;
+    }
+    .modal-meta {
+      margin: 12px 0 20px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .article-content {
+      color: var(--text-soft);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .article-content p + p { margin-top: 14px; }
+
+    .comments {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+    .comments h2 {
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+    .comment-form {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .comment-form input,
+    .comment-form textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      outline: 0;
+      font: inherit;
+    }
+    .comment-form textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+    .comment-form input:focus,
+    .comment-form textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .comment-list {
+      display: grid;
+      gap: 10px;
+    }
+    .comment {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      padding: 12px;
+    }
+    .comment strong {
+      display: block;
+      font-size: 13px;
+    }
+    .comment time {
+      display: block;
+      margin: 2px 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .comment p {
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+    .comment-empty {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .form-message {
+      display: none;
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .form-message.active { display: block; }
+    .form-message.error {
+      border: 1px solid #fecdca;
+      background: #fef3f2;
+      color: #b42318;
+    }
+    .form-message.success {
+      border: 1px solid #abefc6;
+      background: #ecfdf3;
+      color: #027a48;
+    }
+
+    .search-panel {
+      width: min(680px, calc(100% - 32px));
+      margin: 84px auto 0;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+    }
+    .search-panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-panel-head strong {
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+    .search-results {
+      max-height: 62vh;
+      overflow: auto;
+    }
+    .search-item {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .search-item:hover { background: var(--surface-soft); }
+    .search-item img {
+      width: 76px;
+      height: 58px;
+      border-radius: 7px;
+      object-fit: cover;
+    }
+    .search-item h3 {
+      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .no-result {
+      padding: 30px 18px;
+      color: var(--text-soft);
+      text-align: center;
+      font-weight: 700;
+    }
+    .auth-panel {
+      width: min(440px, calc(100% - 32px));
+      margin: 86px auto 0;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+    }
+    .auth-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+    .auth-head h2 {
+      font-size: 17px;
+    }
+    .auth-body {
+      display: grid;
+      gap: 11px;
+      padding: 18px;
+    }
+    .auth-body label {
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .auth-body input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      outline: 0;
+    }
+    .auth-body input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .auth-note {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .blocked-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(7, 12, 24, 0.72);
+      backdrop-filter: blur(6px);
+    }
+    .blocked-screen.active { display: flex; }
+    .blocked-card {
+      width: min(520px, 100%);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .blocked-head {
+      padding: 18px 18px 14px;
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--border);
+    }
+    .blocked-body {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .blocked-body h2 {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    .blocked-body p {
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 1060px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .side-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .top-header {
+        height: auto;
+        min-height: var(--header-height);
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 16px;
+      }
+      .main-nav { top: 112px; }
+      .header-actions, .search { width: 100%; }
+      .container, .footer-inner { width: min(100% - 28px, 1240px); }
+      .hero-main, .hero-main img { min-height: 330px; }
+      .hero-content { padding: 20px; }
+      .side-stack, .cards-grid, .latest-grid, .footer-inner { grid-template-columns: 1fr; }
+      .cards-grid { gap: 12px; }
+      .footer-col:not(.footer-brand) { display: none; }
+      .modal-body { padding: 20px; }
+      .modal-image { height: 230px; }
+    }
+    @media (max-width: 430px) {
+      .main-nav { top: 118px; }
+      .brand-name { font-size: 16px; }
+      .hero-main, .hero-main img { min-height: 290px; }
+      .modal {
+        width: calc(100% - 20px);
+        margin: 10px auto;
+        max-height: calc(100vh - 20px);
+      }
+      .modal-toolbar {
+        align-items: stretch;
+      }
+      .modal-toolbar .text-button {
+        flex: 1;
+        justify-content: center;
+      }
+      .side-card, .list-card, .search-item {
+        grid-template-columns: 84px minmax(0, 1fr);
+      }
+      .side-card img, .list-card img, .search-item img {
+        width: 84px;
+        height: 66px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">İçeriğe geç</a>
+
+  <div class="ticker" aria-label="Son dakika haberleri">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <header class="top-header">
+    <a href="#" class="logo" aria-label="DakikaDakika Teknoloji ana sayfa">
+      <span class="brand-mark">
+        <img src="assets/chip-logo.svg" alt="" aria-hidden="true">
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">Dakika Dakika</span>
+        <span class="brand-subtitle">Teknoloji</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <form class="search" id="searchForm" role="search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input id="searchInput" type="search" placeholder="Haber ara..." autocomplete="off" aria-label="Haber ara" />
+        <button class="icon-button" type="submit" aria-label="Ara"><i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+      <button class="icon-button" type="button" id="accountBtn" aria-label="Hesap"><i class="fa-regular fa-user"></i></button>
+    </div>
+  </header>
+
+  <nav class="main-nav" aria-label="Kategoriler">
+    <div class="nav-inner" id="categoryNav"></div>
+  </nav>
+
+  <main id="main">
+    <section class="section container" aria-labelledby="heroTitle">
+      <div class="hero-grid">
+        <article class="hero-main news-open" id="heroMain" tabindex="0"></article>
+        <div class="side-stack" id="sideStack" aria-label="Öne çıkan diğer haberler"></div>
+      </div>
+    </section>
+
+    <section class="section container" aria-labelledby="featuredTitle">
+      <div class="section-head">
+        <h2 id="featuredTitle">Öne Çıkanlar</h2>
+        <span class="count" id="resultCount"></span>
+      </div>
+      <div class="cards-grid" id="featuredGrid"></div>
+      <div class="empty-state" id="emptyState">Bu kategoride gösterilecek haber bulunamadı.</div>
+    </section>
+
+    <section class="section container" aria-labelledby="latestTitle">
+      <div class="section-head">
+        <h2 id="latestTitle">Son Haberler</h2>
+      </div>
+      <div class="latest-grid" id="latestGrid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col footer-brand">
+        <a href="#" class="logo">
+          <span class="brand-mark">
+            <img src="assets/chip-logo.svg" alt="" aria-hidden="true">
+          </span>
+          <span class="brand-copy">
+            <span class="brand-name">Dakika Dakika</span>
+            <span class="brand-subtitle">Teknoloji</span>
+          </span>
+        </a>
+        <p>Teknoloji dünyasındaki güncel gelişmeleri sade, hızlı ve okunabilir bir deneyimle takip edin.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kategoriler</h4>
+        <ul>
+          <li><a href="#" data-footer-cat="yapay-zeka">Yapay Zeka</a></li>
+          <li><a href="#" data-footer-cat="mobil">Mobil</a></li>
+          <li><a href="#" data-footer-cat="bilgisayar">Bilgisayar</a></li>
+          <li><a href="#" data-footer-cat="guvenlik">Güvenlik</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <ul>
+          <li><a href="#">Hakkımızda</a></li>
+          <li><a href="#">İletişim</a></li>
+          <li><a href="#">Reklam Ver</a></li>
+          <li><a href="#">RSS Akışı</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Yasal</h4>
+        <ul>
+          <li><a href="#">Gizlilik Politikası</a></li>
+          <li><a href="#">Kullanım Koşulları</a></li>
+          <li><a href="#">Çerez Politikası</a></li>
+          <li><a href="#">KVKK</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 DakikaDakika Teknoloji. Tüm hakları saklıdır.</div>
+  </footer>
+
+  <div class="overlay" id="newsOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <article class="modal">
+      <div class="modal-toolbar">
+        <button class="text-button" type="button" id="modalBack"><i class="fa-solid fa-arrow-left"></i> Geri dön</button>
+        <button class="icon-button" type="button" id="modalClose" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <img class="modal-image" id="modalImage" src="" alt="" />
+      <div class="modal-body">
+        <span class="tag" id="modalTag"></span>
+        <h1 class="modal-title" id="modalTitle"></h1>
+        <div class="modal-meta" id="modalMeta"></div>
+        <div class="article-content" id="modalContent"></div>
+        <section class="comments" aria-labelledby="commentsTitle">
+          <h2 id="commentsTitle">Yorumlar</h2>
+          <form class="comment-form" id="commentForm">
+            <input id="commentName" maxlength="40" placeholder="Görünen adın (boşsa Kullanıcı)" />
+            <textarea id="commentText" maxlength="700" placeholder="Yorumunu yaz..." required></textarea>
+            <div class="form-message error" id="commentError"></div>
+            <button class="text-button" type="submit"><i class="fa-regular fa-comment"></i> Yorumu gönder</button>
+          </form>
+          <div class="comment-list" id="commentList"></div>
+        </section>
+      </div>
+    </article>
+  </div>
+
+  <div class="overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-labelledby="searchLabel">
+    <section class="search-panel">
+      <div class="search-panel-head">
+        <strong id="searchLabel">Arama sonuçları</strong>
+        <button class="icon-button" type="button" id="searchClose" aria-label="Aramayı kapat"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </section>
+  </div>
+
+  <div class="overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <section class="auth-panel">
+      <div class="auth-head">
+        <h2 id="authTitle">Hesap girişi</h2>
+        <button class="icon-button" type="button" id="authClose" aria-label="Hesabı kapat"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form class="auth-body" id="authForm">
+        <p class="auth-note">İlk girişte kullanıcı adın ve şifren kaydedilir. Sonraki girişlerde aynı bilgilerle devam edersin.</p>
+        <label for="authUsername">Kullanıcı adı</label>
+        <input id="authUsername" maxlength="32" autocomplete="username" required />
+        <label for="authPassword">Şifre</label>
+        <input id="authPassword" type="password" minlength="3" autocomplete="current-password" required />
+        <div class="form-message error" id="authError"></div>
+        <div class="form-message success" id="authSuccess"></div>
+        <button class="text-button" type="submit"><i class="fa-regular fa-user"></i> Devam et</button>
+        <button class="text-button" type="button" id="logoutUserBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış yap</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="blocked-screen" id="blockedScreen" aria-modal="true" role="dialog" aria-labelledby="blockedTitle">
+    <section class="blocked-card">
+      <div class="blocked-head">
+        <a href="#" class="logo" aria-label="DakikaDakika Teknoloji ana sayfa">
+          <span class="brand-mark">
+            <img src="assets/chip-logo.svg" alt="" aria-hidden="true">
+          </span>
+          <span class="brand-copy">
+            <span class="brand-name">Dakika Dakika</span>
+            <span class="brand-subtitle">Teknoloji</span>
+          </span>
+        </a>
+      </div>
+      <div class="blocked-body">
+        <h2 id="blockedTitle">Hesabın geçici olarak banlandı</h2>
+        <p>Bu hesaba ait erişim admin tarafından kaldırılana kadar kapalı kalır. Ban kaldırıldığında sayfayı yenileyerek yeniden giriş yapabilirsin.</p>
+        <button class="text-button" type="button" id="blockedLogoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış yap</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop";
+    const USERS_KEY = "ddt_users";
+    const CURRENT_USER_KEY = "ddt_current_user";
+    const COMMENT_KEY = "ddt_comments";
+    const BAD_WORDS = [
+      "amk", "aq", "mk", "sikt", "orospu", "pic", "piç", "yarr", "got", "göt",
+      "bok", "salak", "aptal", "gerizekali", "gerizekalı", "ibne", "pezevenk",
+      "kahpe", "kaltak", "haysiyetsiz", "şerefsiz", "serefsiz"
+    ];
+
+    const CATEGORIES = [
+      ["tumu", "Tümü"],
+      ["son", "Son Haberler"],
+      ["yapay-zeka", "Yapay Zeka"],
+      ["mobil", "Mobil"],
+      ["oyun", "Oyun"],
+      ["otomobil", "Otomobil"],
+      ["bilgisayar", "Bilgisayar"],
+      ["guvenlik", "Güvenlik"],
+      ["uzay", "Uzay"]
+    ];
+
+    const NEWS = [
+      {
+        id: 1,
+        tag: "Mobil",
+        cat: "mobil",
+        title: "Samsung Galaxy S26 FE Geekbench testinde görüldü",
+        img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=900&auto=format&fit=crop",
+        meta: "2 saat önce • 14.8K görüntülenme",
+        summary: "Yeni FE modelinin işlemci, RAM ve batarya detaylarına dair ilk bilgiler ortaya çıktı.",
+        content: [
+          "Samsung'un bütçe dostu amiral gemisi serisi Galaxy FE'nin yeni halkası S26 FE, Geekbench veri tabanında ortaya çıktı. İlk sonuçlar cihazın performans tarafında güçlü bir sıçrama yapabileceğini gösteriyor.",
+          "Sızdırılan bilgilere göre Galaxy S26 FE, 12 GB RAM seçeneği ve Android 16 tabanlı One UI arayüzüyle gelecek. Pil kapasitesinin 4.900 mAh seviyesinde olması bekleniyor.",
+          "Cihazın resmi tanıtımının yılın son çeyreğinde yapılması bekleniyor. Samsung'un FE serisindeki fiyat-performans çizgisini koruması bekleniyor."
+        ]
+      },
+      {
+        id: 2,
+        tag: "Mobil",
+        cat: "mobil",
+        title: "Xiaomi 18 Pro yeni sızıntılarla gündemde",
+        img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900&auto=format&fit=crop",
+        meta: "4 saat önce • 9.3K görüntülenme",
+        summary: "Xiaomi'nin yeni amiral gemisi için ekran, kamera ve işlemci tarafında iddialı bilgiler paylaşıldı.",
+        content: [
+          "Xiaomi 18 Pro, güvenilir sızıntı kaynaklarından gelen bilgilerle yeniden teknoloji gündemine taşındı. Cihazın yeni nesil Snapdragon işlemci ve yüksek parlaklıklı AMOLED panelle gelmesi bekleniyor.",
+          "Kamera tarafında periskop zoom lensin daha gelişmiş bir sürümünün kullanılacağı iddia ediliyor. Bu değişiklik özellikle gece ve uzak mesafe çekimlerinde fark yaratabilir."
+        ]
+      },
+      {
+        id: 3,
+        tag: "Yapay Zeka",
+        cat: "yapay-zeka",
+        title: "OpenAI Türkçe dil desteğini güçlendiriyor",
+        img: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&auto=format&fit=crop",
+        meta: "6 saat önce • 22K görüntülenme",
+        summary: "Yeni güncellemelerle Türkçe metin anlama, yazım ve uzun bağlam performansı iyileştiriliyor.",
+        content: [
+          "OpenAI, modellerinin Türkçe performansını artırmak için kapsamlı bir iyileştirme paketi üzerinde çalışıyor. Güncellemeler özellikle uzun metinleri anlama ve daha doğal yanıt üretme tarafında öne çıkıyor.",
+          "Türkçe yazım, tonlama ve bağlam takibi gibi alanlarda yapılan iyileştirmelerin hem ChatGPT hem de API kullanıcılarına kademeli olarak yansıması bekleniyor."
+        ]
+      },
+      {
+        id: 4,
+        tag: "Yapay Zeka",
+        cat: "yapay-zeka",
+        title: "Gemini Flash Türkçe kullanımda daha hızlı yanıt veriyor",
+        img: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=900&auto=format&fit=crop",
+        meta: "8 saat önce • 15K görüntülenme",
+        summary: "Google'ın hızlı yapay zeka modeli Türkçe sorgularda daha düşük gecikme ve daha tutarlı sonuçlar sunuyor.",
+        content: [
+          "Google'ın hız odaklı yapay zeka modeli, Türkçe sorgularda daha akıcı yanıtlar vermeye başladı. Modelin özellikle kısa yanıt, özetleme ve e-posta taslağı gibi işlerde hız avantajı sunduğu belirtiliyor.",
+          "Workspace entegrasyonlarının da genişlemesiyle modelin günlük üretkenlik akışlarında daha görünür hale gelmesi bekleniyor."
+        ]
+      },
+      {
+        id: 5,
+        tag: "Yazılım",
+        cat: "son",
+        title: "Android 16 kararlı sürümü için ilk cihaz listesi paylaşıldı",
+        img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=900&auto=format&fit=crop",
+        meta: "7 saat önce • 17K görüntülenme",
+        summary: "Yeni Android sürümü pil, bildirim ve güvenlik tarafında önemli yeniliklerle geliyor.",
+        content: [
+          "Android 16 kararlı sürümüyle birlikte bildirim yönetimi, güvenlik izinleri ve pil optimizasyonu tarafında önemli değişiklikler sunuluyor.",
+          "İlk güncellemelerin Pixel modellerine ulaşması, diğer üreticilerin ise kendi arayüz güncellemelerini kademeli olarak yayınlaması bekleniyor."
+        ]
+      },
+      {
+        id: 6,
+        tag: "Bilgisayar",
+        cat: "bilgisayar",
+        title: "AMD Ryzen 9 9950X3D test sonuçları sızdırıldı",
+        img: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=900&auto=format&fit=crop",
+        meta: "9 saat önce • 12K görüntülenme",
+        summary: "Yeni işlemci, çok çekirdekli performans ve oyun testlerinde iddialı skorlarla göründü.",
+        content: [
+          "AMD'nin yeni üst seviye masaüstü işlemcisine ait olduğu iddia edilen benchmark sonuçları kısa süreliğine çevrim içi bir platformda yayınlandı.",
+          "İlk verilere göre işlemci, çok çekirdekli testlerde önceki nesle kıyasla anlamlı bir artış sağlıyor. Oyun tarafında da 3D V-Cache avantajının korunması bekleniyor."
+        ]
+      },
+      {
+        id: 7,
+        tag: "Oyun",
+        cat: "oyun",
+        title: "Yeni nesil taşınabilir oyun cihazları rekabeti büyütüyor",
+        img: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=900&auto=format&fit=crop",
+        meta: "11 saat önce • 18K görüntülenme",
+        summary: "OLED ekran, daha serin çalışan işlemciler ve uzun pil ömrü yeni modellerin ana odağı oldu.",
+        content: [
+          "Taşınabilir oyun cihazları pazarı yeni modellerle hız kazanıyor. Üreticiler bu yıl özellikle ekran kalitesi, fan sesi ve pil ömrü konularına odaklanmış durumda.",
+          "Bulut oyun servisleri ve yerel donanım gücünün birleşmesi, bu cihazları klasik el konsollarından daha esnek hale getiriyor."
+        ]
+      },
+      {
+        id: 8,
+        tag: "Otomobil",
+        cat: "otomobil",
+        title: "Elektrikli otomobillerde hızlı şarj yarışı kızışıyor",
+        img: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=900&auto=format&fit=crop",
+        meta: "1 gün önce • 10K görüntülenme",
+        summary: "Yeni batarya mimarileri 10 dakikanın altında anlamlı menzil kazanımı vadetmeye başladı.",
+        content: [
+          "Elektrikli otomobil üreticileri, daha kısa şarj süreleri için yeni batarya mimarileri ve daha verimli ısı yönetimi sistemleri geliştiriyor.",
+          "Altyapı tarafındaki gelişmelerle birlikte kullanıcıların uzun yol deneyiminde daha az bekleme süresiyle karşılaşması bekleniyor."
+        ]
+      },
+      {
+        id: 9,
+        tag: "Güvenlik",
+        cat: "guvenlik",
+        title: "Yeni kimlik avı saldırıları yapay zeka ile daha inandırıcı hale geliyor",
+        img: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=900&auto=format&fit=crop",
+        meta: "1 gün önce • 8.5K görüntülenme",
+        summary: "Uzmanlar, e-posta ve mesajlaşma uygulamalarında daha dikkatli doğrulama yapılmasını öneriyor.",
+        content: [
+          "Siber güvenlik uzmanları, yapay zeka destekli kimlik avı saldırılarının dil ve tasarım açısından daha ikna edici hale geldiğini belirtiyor.",
+          "Kullanıcıların bağlantılara tıklamadan önce adresleri kontrol etmesi, iki aşamalı doğrulama kullanması ve şüpheli dosyaları açmaması öneriliyor."
+        ]
+      },
+      {
+        id: 10,
+        tag: "Uzay",
+        cat: "uzay",
+        title: "Yeni uydu ağı kırsal internet erişimini hızlandırabilir",
+        img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=900&auto=format&fit=crop",
+        meta: "2 gün önce • 7.1K görüntülenme",
+        summary: "Düşük yörünge uyduları, kapsama alanı sınırlı bölgelerde daha kararlı bağlantı sunmayı hedefliyor.",
+        content: [
+          "Düşük yörünge uydu ağları, kırsal bölgelerde internet erişimini güçlendirmek için daha fazla ülkede kullanıma açılıyor.",
+          "Yeni nesil terminallerin daha küçük, daha verimli ve daha düşük gecikmeli bağlantı sunması bekleniyor."
+        ]
+      }
+    ];
+
+    function loadAdminNews() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ddt_news") || "[]");
+        if (!Array.isArray(stored)) return [];
+        return stored.map((item, index) => ({
+          id: Number(item.id) || 1000 + index,
+          tag: item.tag || "Haber",
+          cat: item.cat || "son",
+          title: item.title || "Başlıksız haber",
+          img: item.img || FALLBACK_IMAGE,
+          meta: item.meta || "Yeni eklendi",
+          summary: item.summary || "Admin panelinden eklenen haber.",
+          content: Array.isArray(item.content) ? item.content : [String(item.content || "İçerik eklenmedi.")]
+        }));
+      } catch (error) {
+        return [];
+      }
+    }
+
+    const allNews = [...loadAdminNews(), ...NEWS];
+    let activeCategory = "tumu";
+    let activeNewsId = null;
+
+    const els = {
+      ticker: document.getElementById("tickerTrack"),
+      nav: document.getElementById("categoryNav"),
+      hero: document.getElementById("heroMain"),
+      side: document.getElementById("sideStack"),
+      featured: document.getElementById("featuredGrid"),
+      latest: document.getElementById("latestGrid"),
+      count: document.getElementById("resultCount"),
+      empty: document.getElementById("emptyState"),
+      searchForm: document.getElementById("searchForm"),
+      searchInput: document.getElementById("searchInput"),
+      searchOverlay: document.getElementById("searchOverlay"),
+      searchResults: document.getElementById("searchResults"),
+      searchLabel: document.getElementById("searchLabel"),
+      newsOverlay: document.getElementById("newsOverlay"),
+      modalImage: document.getElementById("modalImage"),
+      modalTag: document.getElementById("modalTag"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalMeta: document.getElementById("modalMeta"),
+      modalContent: document.getElementById("modalContent"),
+      commentForm: document.getElementById("commentForm"),
+      commentName: document.getElementById("commentName"),
+      commentText: document.getElementById("commentText"),
+      commentList: document.getElementById("commentList"),
+      commentError: document.getElementById("commentError"),
+      accountBtn: document.getElementById("accountBtn"),
+      authOverlay: document.getElementById("authOverlay"),
+      authForm: document.getElementById("authForm"),
+      authUsername: document.getElementById("authUsername"),
+      authPassword: document.getElementById("authPassword"),
+      authError: document.getElementById("authError"),
+      authSuccess: document.getElementById("authSuccess"),
+      authClose: document.getElementById("authClose"),
+      logoutUserBtn: document.getElementById("logoutUserBtn")
+    };
+
+    function cleanText(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function rawText(value) {
+      return String(value || "");
+    }
+
+    function showMessage(element, text, timeout = 3200) {
+      element.textContent = text;
+      element.classList.add("active");
+      if (timeout) {
+        window.setTimeout(() => element.classList.remove("active"), timeout);
+      }
+    }
+
+    function normalizeForFilter(value) {
+      return String(value || "")
+        .toLocaleLowerCase("tr-TR")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replaceAll("ı", "i")
+        .replaceAll("ğ", "g")
+        .replaceAll("ü", "u")
+        .replaceAll("ş", "s")
+        .replaceAll("ö", "o")
+        .replaceAll("ç", "c")
+        .replace(/[@4]/g, "a")
+        .replace(/[!1|]/g, "i")
+        .replace(/[$5]/g, "s")
+        .replace(/[0]/g, "o")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function normalizeTokens(value) {
+      return String(value || "")
+        .toLocaleLowerCase("tr-TR")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replaceAll("ı", "i")
+        .replaceAll("ğ", "g")
+        .replaceAll("ü", "u")
+        .replaceAll("ş", "s")
+        .replaceAll("ö", "o")
+        .replaceAll("ç", "c")
+        .replace(/[@4]/g, "a")
+        .replace(/[!1|]/g, "i")
+        .replace(/[$5]/g, "s")
+        .replace(/[0]/g, "o")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+    }
+
+    function hasBadWords(value) {
+      const normalized = normalizeForFilter(value);
+      const tokens = normalizeTokens(value);
+      return BAD_WORDS.some((word) => {
+        const bad = normalizeForFilter(word);
+        return bad.length <= 3 ? tokens.includes(bad) : normalized.includes(bad);
+      });
+    }
+
+    function getUsers() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function getCurrentUser() {
+      const username = localStorage.getItem(CURRENT_USER_KEY);
+      if (!username) return null;
+      return getUsers().find((user) => user.username === username) || null;
+    }
+
+    function setCurrentUser(username) {
+      localStorage.setItem(CURRENT_USER_KEY, username);
+    }
+
+    function isUserBanned(username) {
+      const user = getUsers().find((item) => item.username === username);
+      return Boolean(user && user.banned);
+    }
+
+    function openAuth() {
+      const user = getCurrentUser();
+      els.authError.classList.remove("active");
+      els.authSuccess.classList.remove("active");
+      els.authUsername.value = user ? user.username : "";
+      els.authPassword.value = "";
+      els.logoutUserBtn.style.display = user ? "inline-flex" : "none";
+      els.authOverlay.classList.add("active");
+      document.body.classList.add("modal-open");
+      window.setTimeout(() => els.authUsername.focus(), 50);
+    }
+
+    function closeAuth() {
+      els.authOverlay.classList.remove("active");
+      if (!els.newsOverlay.classList.contains("active") && !els.searchOverlay.classList.contains("active")) {
+        document.body.classList.remove("modal-open");
+      }
+    }
+
+    function contentToHtml(content) {
+      const paragraphs = Array.isArray(content) ? content : [content];
+      return paragraphs.map((text) => `<p>${cleanText(text)}</p>`).join("");
+    }
+
+    function cardImage(news) {
+      const url = String(news.img || FALLBACK_IMAGE);
+      try {
+        const parsed = new URL(url, window.location.href);
+        if (["http:", "https:"].includes(parsed.protocol)) return parsed.href;
+      } catch (error) {}
+      return FALLBACK_IMAGE;
+    }
+
+    function getComments() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(COMMENT_KEY) || "{}");
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function setComments(comments) {
+      localStorage.setItem(COMMENT_KEY, JSON.stringify(comments));
+    }
+
+    function renderComments(newsId) {
+      const comments = getComments();
+      const list = comments[String(newsId)] || [];
+
+      els.commentList.innerHTML = list.length
+        ? list.map((comment) => `
+          <article class="comment">
+            <strong>${cleanText(comment.name || "Misafir")}</strong>
+            <time>${cleanText(comment.date || "Yeni yorum")}</time>
+            <p>${cleanText(comment.text)}</p>
+          </article>
+        `).join("")
+        : `<div class="comment-empty">Bu haber için henüz yorum yapılmadı.</div>`;
+    }
+
+    function getVisibleNews() {
+      if (activeCategory === "tumu") return allNews;
+      return allNews.filter((item) => item.cat === activeCategory);
+    }
+
+    function renderTicker() {
+      const items = allNews.slice(0, 8).map((item) => `<span>${cleanText(item.title)}</span>`).join("");
+      els.ticker.innerHTML = items + items;
+    }
+
+    function renderNav() {
+      els.nav.innerHTML = CATEGORIES.map(([key, label]) => `
+        <button class="nav-link ${key === activeCategory ? "active" : ""}" type="button" data-cat="${key}">${label}</button>
+      `).join("");
+    }
+
+    function renderHero() {
+      const visible = getVisibleNews();
+      const main = visible[0] || allNews[0];
+      const side = visible.slice(1, 5);
+
+      els.hero.dataset.id = main.id;
+      els.hero.innerHTML = `
+        <img src="${cardImage(main)}" alt="${cleanText(main.title)}" loading="eager">
+        <div class="hero-content">
+          <span class="tag">${cleanText(main.tag)}</span>
+          <h1 id="heroTitle">${cleanText(main.title)}</h1>
+          <div class="meta"><span><i class="fa-regular fa-clock"></i> ${cleanText(main.meta)}</span></div>
+        </div>
+      `;
+
+      els.side.innerHTML = side.map((item) => `
+        <article class="side-card news-open" tabindex="0" data-id="${item.id}">
+          <img src="${cardImage(item)}" alt="${cleanText(item.title)}" loading="lazy">
+          <div>
+            <div class="small-tag">${cleanText(item.tag)}</div>
+            <h3>${cleanText(item.title)}</h3>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderCards() {
+      const visible = getVisibleNews();
+      const featured = visible.slice(0, 8);
+      const latest = visible.slice(0, 6);
+
+      els.count.textContent = `${visible.length} haber`;
+      els.empty.classList.toggle("active", visible.length === 0);
+
+      els.featured.innerHTML = featured.map((item) => `
+        <article class="news-card news-open" tabindex="0" data-id="${item.id}">
+          <img src="${cardImage(item)}" alt="${cleanText(item.title)}" loading="lazy">
+          <div class="news-card-body">
+            <div class="small-tag">${cleanText(item.tag)}</div>
+            <h3>${cleanText(item.title)}</h3>
+            <div class="card-meta">${cleanText(item.meta)}</div>
+          </div>
+        </article>
+      `).join("");
+
+      els.latest.innerHTML = latest.map((item) => `
+        <article class="list-card news-open" tabindex="0" data-id="${item.id}">
+          <img src="${cardImage(item)}" alt="${cleanText(item.title)}" loading="lazy">
+          <div>
+            <div class="small-tag">${cleanText(item.tag)}</div>
+            <h3>${cleanText(item.title)}</h3>
+            <p>${cleanText(item.summary)}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderPage() {
+      renderNav();
+      renderHero();
+      renderCards();
+    }
+
+    function openNews(id) {
+      const news = allNews.find((item) => item.id === Number(id));
+      if (!news) return;
+
+      activeNewsId = Number(id);
+      els.modalImage.src = cardImage(news);
+      els.modalImage.alt = rawText(news.title);
+      els.modalTag.textContent = rawText(news.tag);
+      els.modalTitle.textContent = rawText(news.title);
+      els.modalMeta.innerHTML = `<i class="fa-regular fa-clock"></i> ${cleanText(news.meta)}`;
+      els.modalContent.innerHTML = contentToHtml(news.content);
+      els.commentForm.reset();
+      els.commentError.classList.remove("active");
+      els.commentName.value = (getCurrentUser() && !isUserBanned(getCurrentUser().username)) ? getCurrentUser().username : "";
+      renderComments(activeNewsId);
+      els.newsOverlay.classList.add("active");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeOverlays() {
+      els.newsOverlay.classList.remove("active");
+      els.searchOverlay.classList.remove("active");
+      els.authOverlay.classList.remove("active");
+      document.body.classList.remove("modal-open");
+    }
+
+    els.commentForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!activeNewsId) return;
+
+      const user = getCurrentUser();
+      if (user && user.banned) {
+        showMessage(els.commentError, "Bu hesap admin tarafından banlandı. Yorum gönderemezsin.");
+        return;
+      }
+
+      const name = els.commentName.value.trim() || "Kullanıcı";
+      const text = els.commentText.value.trim();
+      if (!text) return;
+      if (hasBadWords(name)) {
+        showMessage(els.commentError, "Kullanıcı adında argo veya kötü söz kullanılamaz.");
+        return;
+      }
+      if (hasBadWords(text)) {
+        showMessage(els.commentError, "Yorumda argo veya kötü söz kullanılamaz.");
+        return;
+      }
+
+      const comments = getComments();
+      const key = String(activeNewsId);
+      comments[key] = comments[key] || [];
+      comments[key].unshift({
+        id: Date.now(),
+        name,
+        username: user ? user.username : "",
+        text,
+        date: new Date().toLocaleString("tr-TR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      });
+      setComments(comments);
+      els.commentForm.reset();
+      els.commentName.value = user ? user.username : "";
+      els.commentError.classList.remove("active");
+      renderComments(activeNewsId);
+    });
+
+    els.authForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const username = els.authUsername.value.trim();
+      const password = els.authPassword.value;
+
+      if (!username || !password) return;
+      if (hasBadWords(username)) {
+        showMessage(els.authError, "Kullanıcı adında argo veya kötü söz kullanılamaz.");
+        return;
+      }
+
+      const users = getUsers();
+      const existing = users.find((user) => user.username.toLocaleLowerCase("tr-TR") === username.toLocaleLowerCase("tr-TR"));
+
+      if (existing) {
+        if (existing.password !== password) {
+          showMessage(els.authError, "Şifre hatalı.");
+          return;
+        }
+        if (existing.banned) {
+          showMessage(els.authError, "Bu hesap admin tarafından banlandı.");
+          return;
+        }
+        existing.lastLogin = new Date().toLocaleString("tr-TR");
+        setUsers(users);
+        setCurrentUser(existing.username);
+        showMessage(els.authSuccess, "Giriş yapıldı.");
+      } else {
+        users.unshift({
+          id: Date.now(),
+          username,
+          password,
+          banned: false,
+          createdAt: new Date().toLocaleString("tr-TR"),
+          lastLogin: new Date().toLocaleString("tr-TR")
+        });
+        setUsers(users);
+        setCurrentUser(username);
+        showMessage(els.authSuccess, "Hesap oluşturuldu ve hatırlandı.");
+      }
+
+      els.commentName.value = username;
+      window.setTimeout(closeAuth, 650);
+    });
+
+    els.accountBtn.addEventListener("click", openAuth);
+    els.authClose.addEventListener("click", closeAuth);
+    els.logoutUserBtn.addEventListener("click", () => {
+      localStorage.removeItem(CURRENT_USER_KEY);
+      els.authUsername.value = "";
+      els.authPassword.value = "";
+      els.commentName.value = "";
+      showMessage(els.authSuccess, "Çıkış yapıldı.");
+      window.setTimeout(closeAuth, 650);
+    });
+
+    function doSearch(query) {
+      const q = query.trim().toLocaleLowerCase("tr-TR");
+      if (!q) return;
+
+      const results = allNews.filter((item) => {
+        const haystack = `${item.title} ${item.tag} ${item.summary} ${(item.content || []).join(" ")}`.toLocaleLowerCase("tr-TR");
+        return haystack.includes(q);
+      });
+
+      els.searchLabel.textContent = results.length ? `"${q}" için ${results.length} sonuç` : `"${q}" için sonuç bulunamadı`;
+      els.searchResults.innerHTML = results.length
+        ? results.map((item) => `
+          <article class="search-item" data-id="${item.id}" tabindex="0">
+            <img src="${cardImage(item)}" alt="${cleanText(item.title)}" loading="lazy">
+            <div>
+              <div class="small-tag">${cleanText(item.tag)}</div>
+              <h3>${cleanText(item.title)}</h3>
+            </div>
+          </article>
+        `).join("")
+        : `<div class="no-result"><i class="fa-solid fa-magnifying-glass"></i><br>Aramanızla eşleşen haber bulunamadı.</div>`;
+
+      els.searchOverlay.classList.add("active");
+      document.body.classList.add("modal-open");
+    }
+
+    document.addEventListener("click", (event) => {
+      const navButton = event.target.closest(".nav-link");
+      const newsCard = event.target.closest(".news-open, .search-item");
+      const footerCat = event.target.closest("[data-footer-cat]");
+
+      if (navButton) {
+        activeCategory = navButton.dataset.cat;
+        renderPage();
+        document.getElementById("main").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      if (footerCat) {
+        event.preventDefault();
+        activeCategory = footerCat.dataset.footerCat;
+        renderPage();
+        document.getElementById("main").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      if (newsCard) {
+        openNews(newsCard.dataset.id);
+      }
+
+      if (event.target === els.newsOverlay || event.target === els.searchOverlay || event.target === els.authOverlay) {
+        closeOverlays();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeOverlays();
+      if (event.key === "Enter") {
+        const item = event.target.closest(".news-open, .search-item");
+        if (item) openNews(item.dataset.id);
+      }
+    });
+
+    els.searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      doSearch(els.searchInput.value);
+    });
+
+    document.getElementById("modalBack").addEventListener("click", closeOverlays);
+    document.getElementById("modalClose").addEventListener("click", closeOverlays);
+    document.getElementById("searchClose").addEventListener("click", closeOverlays);
+
+    renderTicker();
+    renderPage();
+    if (!getCurrentUser()) {
+      window.setTimeout(openAuth, 500);
+    }
+  </script>
+</body>
+</html>

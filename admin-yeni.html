@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DakikaDakika Yönetim Paneli</title>
+  <style>
+    :root {
+      --accent: #145fe8;
+      --accent-dark: #0f48b3;
+      --danger: #dc2626;
+      --bg: #eef3f8;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fd;
+      --border: #dce5f1;
+      --text: #101828;
+      --soft: #475467;
+      --muted: #8a9bb1;
+      --shadow: 0 18px 50px rgba(16, 24, 40, 0.1);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 21px;
+      font-weight: 800;
+    }
+    .brand h1 {
+      font-size: clamp(20px, 3vw, 28px);
+      line-height: 1.1;
+    }
+    .brand p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .login {
+      width: min(440px, calc(100% - 32px));
+      margin: 10vh auto 0;
+      padding: 28px;
+    }
+    .login h2 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    .login p {
+      margin-bottom: 18px;
+      color: var(--soft);
+      font-size: 14px;
+    }
+
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .login.hidden { display: none; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+    .card-head h2 {
+      font-size: 16px;
+    }
+    .card-body { padding: 18px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field.full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 12px;
+      outline: 0;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea { min-height: 170px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(20, 95, 232, 0.1);
+    }
+    .hint {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 9px 13px;
+      font-weight: 800;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn.primary:hover { background: var(--accent-dark); }
+    .btn.secondary {
+      border-color: var(--border);
+      background: var(--surface-soft);
+      color: var(--soft);
+    }
+    .btn.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn.danger {
+      border-color: rgba(220, 38, 38, 0.18);
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--danger);
+    }
+
+    .status {
+      display: none;
+      margin-top: 14px;
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status.active { display: block; }
+    .status.success {
+      background: #ecfdf3;
+      color: #027a48;
+      border: 1px solid #abefc6;
+    }
+    .status.error {
+      background: #fef3f2;
+      color: #b42318;
+      border: 1px solid #fecdca;
+    }
+
+    .preview {
+      display: grid;
+      gap: 12px;
+    }
+    .preview-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius);
+      object-fit: cover;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+    }
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 5px;
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+    .preview h3 {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .preview p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .news-list {
+      display: grid;
+      gap: 10px;
+      max-height: 520px;
+      overflow: auto;
+    }
+    .news-item {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+    .news-item img {
+      width: 72px;
+      height: 58px;
+      border-radius: 7px;
+      object-fit: cover;
+      background: var(--surface-soft);
+    }
+    .news-item h3 {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .news-item p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .news-item .mini-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mini {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--soft);
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .mini.delete { color: var(--danger); }
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--soft);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .comment-list {
+      display: grid;
+      gap: 10px;
+    }
+    .comment-item, .user-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+    }
+    .comment-item h3 {
+      margin-bottom: 5px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .comment-item strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .comment-item time {
+      display: block;
+      margin: 2px 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .comment-item p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+    .user-list {
+      display: grid;
+      gap: 10px;
+    }
+    .user-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .user-item h3 {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .user-item p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 6px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #ecfdf3;
+      color: #027a48;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge.banned {
+      background: #fef3f2;
+      color: #b42318;
+    }
+
+    @media (max-width: 860px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .page {
+        width: min(100% - 22px, 1120px);
+        padding: 16px 0;
+      }
+      .login {
+        width: 100%;
+        margin-top: 5vh;
+        padding: 20px;
+      }
+      .card-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .actions, .card-head .actions {
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+      }
+      .news-item {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+      .news-item img {
+        width: 64px;
+        height: 54px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel login" id="loginPanel">
+      <h2>Yönetici girişi</h2>
+      <p>Yeni haber eklemek ve eklediğin haberleri düzenlemek için giriş yap.</p>
+      <form id="loginForm">
+        <label for="password">Erişim şifresi</label>
+        <input id="password" type="password" placeholder="Şifre" autocomplete="current-password" />
+        <div class="actions">
+          <button class="btn primary" type="submit">Giriş yap</button>
+        </div>
+      </form>
+      <div class="status error" id="loginError">Şifre hatalı.</div>
+    </section>
+
+    <section class="dashboard" id="dashboard">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+          <div>
+            <h1>DakikaDakika Yönetim Paneli</h1>
+            <p>Eklenen haberler tarayıcıda <strong>ddt_news</strong> adıyla saklanır.</p>
+          </div>
+        </div>
+        <button class="btn secondary" type="button" id="logoutBtn">Çıkış yap</button>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="card">
+          <div class="card-head">
+            <h2 id="formTitle">Yeni haber ekle</h2>
+            <button class="btn secondary" type="button" id="resetBtn">Formu temizle</button>
+          </div>
+          <div class="card-body">
+            <form id="newsForm">
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="title">Haber başlığı</label>
+                  <input id="title" required maxlength="140" placeholder="Örn: Yeni yapay zeka modeli tanıtıldı" />
+                </div>
+
+                <div class="field">
+                  <label for="category">Kategori</label>
+                  <select id="category" required>
+                    <option value="son">Son Haberler</option>
+                    <option value="yapay-zeka">Yapay Zeka</option>
+                    <option value="mobil">Mobil</option>
+                    <option value="oyun">Oyun</option>
+                    <option value="otomobil">Otomobil</option>
+                    <option value="bilgisayar">Bilgisayar</option>
+                    <option value="guvenlik">Güvenlik</option>
+                    <option value="uzay">Uzay</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="tag">Etiket</label>
+                  <input id="tag" required placeholder="Örn: Yapay Zeka" />
+                </div>
+
+                <div class="field full">
+                  <label for="image">Görsel URL</label>
+                  <input id="image" type="url" placeholder="https://..." />
+                  <div class="hint">Boş bırakırsan ana site varsayılan teknoloji görselini kullanır.</div>
+                </div>
+
+                <div class="field full">
+                  <label for="summary">Kısa özet</label>
+                  <input id="summary" required maxlength="220" placeholder="Haber kartlarında görünecek kısa açıklama" />
+                </div>
+
+                <div class="field full">
+                  <label for="content">Haber metni</label>
+                  <textarea id="content" required placeholder="Paragrafları boş satırla ayırabilirsin."></textarea>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn primary" type="submit" id="saveBtn">Haberi siteye gönder</button>
+                <button class="btn secondary" type="button" id="previewBtn">Önizlemeyi güncelle</button>
+              </div>
+              <div class="status success" id="successMsg">Haber kaydedildi. Ana siteyi yenilediğinde haber görünecek.</div>
+              <div class="status error" id="errorMsg">Lütfen zorunlu alanları doldur.</div>
+            </form>
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="card-head">
+            <h2>Önizleme</h2>
+          </div>
+          <div class="card-body preview">
+            <img class="preview-image" id="previewImage" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop" alt="Haber önizleme görseli" />
+            <span class="tag" id="previewTag">Son Haberler</span>
+            <h3 id="previewTitle">Başlık burada görünecek</h3>
+            <p id="previewSummary">Kısa özet burada görünecek.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="card-head">
+          <h2>Eklenen haberler</h2>
+          <div class="actions" style="margin: 0;">
+            <button class="btn secondary" type="button" id="exportBtn">JSON dışa aktar</button>
+            <button class="btn danger" type="button" id="clearBtn">Tümünü sil</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="news-list" id="newsList"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="card-head">
+          <h2>Yorum yönetimi</h2>
+        </div>
+        <div class="card-body">
+          <div class="comment-list" id="commentList"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="card-head">
+          <h2>Kullanıcı yönetimi</h2>
+        </div>
+        <div class="card-body">
+          <div class="user-list" id="userList"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const PASSWORD = "ADM\u0130N123";
+    const STORAGE_KEY = "ddt_news";
+    const COMMENT_STORAGE_KEY = "ddt_comments";
+    const USERS_STORAGE_KEY = "ddt_users";
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop";
+    const CATEGORY_LABELS = {
+      "son": "Son Haberler",
+      "yapay-zeka": "Yapay Zeka",
+      "mobil": "Mobil",
+      "oyun": "Oyun",
+      "otomobil": "Otomobil",
+      "bilgisayar": "Bilgisayar",
+      "guvenlik": "Güvenlik",
+      "uzay": "Uzay"
+    };
+    const BUILTIN_TITLES = {
+      "1": "Samsung Galaxy S26 FE Geekbench testinde görüldü",
+      "2": "Xiaomi 18 Pro yeni sızıntılarla gündemde",
+      "3": "OpenAI Türkçe dil desteğini güçlendiriyor",
+      "4": "Gemini Flash Türkçe kullanımda daha hızlı yanıt veriyor",
+      "5": "Android 16 kararlı sürümü için ilk cihaz listesi paylaşıldı",
+      "6": "AMD Ryzen 9 9950X3D test sonuçları sızdırıldı",
+      "7": "Yeni nesil taşınabilir oyun cihazları rekabeti büyütüyor",
+      "8": "Elektrikli otomobillerde hızlı şarj yarışı kızışıyor",
+      "9": "Yeni kimlik avı saldırıları yapay zeka ile daha inandırıcı hale geliyor",
+      "10": "Yeni uydu ağı kırsal internet erişimini hızlandırabilir"
+    };
+
+    let editingIndex = null;
+
+    const els = {
+      loginPanel: document.getElementById("loginPanel"),
+      dashboard: document.getElementById("dashboard"),
+      loginForm: document.getElementById("loginForm"),
+      password: document.getElementById("password"),
+      loginError: document.getElementById("loginError"),
+      newsForm: document.getElementById("newsForm"),
+      formTitle: document.getElementById("formTitle"),
+      title: document.getElementById("title"),
+      category: document.getElementById("category"),
+      tag: document.getElementById("tag"),
+      image: document.getElementById("image"),
+      summary: document.getElementById("summary"),
+      content: document.getElementById("content"),
+      saveBtn: document.getElementById("saveBtn"),
+      successMsg: document.getElementById("successMsg"),
+      errorMsg: document.getElementById("errorMsg"),
+      previewImage: document.getElementById("previewImage"),
+      previewTag: document.getElementById("previewTag"),
+      previewTitle: document.getElementById("previewTitle"),
+      previewSummary: document.getElementById("previewSummary"),
+      newsList: document.getElementById("newsList"),
+      commentList: document.getElementById("commentList"),
+      userList: document.getElementById("userList")
+    };
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getNews() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setNews(news) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(news));
+    }
+
+    function getComments() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(COMMENT_STORAGE_KEY) || "{}");
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function setComments(comments) {
+      localStorage.setItem(COMMENT_STORAGE_KEY, JSON.stringify(comments));
+    }
+
+    function getUsers() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    }
+
+    function validImageUrl(url) {
+      if (!url.trim()) return FALLBACK_IMAGE;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+      } catch (error) {}
+      return FALLBACK_IMAGE;
+    }
+
+    function showStatus(element, message) {
+      element.textContent = message;
+      element.classList.add("active");
+      window.setTimeout(() => element.classList.remove("active"), 3200);
+    }
+
+    function buildNewsFromForm() {
+      const title = els.title.value.trim();
+      const cat = els.category.value;
+      const tag = els.tag.value.trim() || CATEGORY_LABELS[cat];
+      const summary = els.summary.value.trim();
+      const paragraphs = els.content.value
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean);
+
+      if (!title || !summary || paragraphs.length === 0) return null;
+
+      return {
+        title,
+        cat,
+        tag,
+        img: validImageUrl(els.image.value),
+        summary,
+        meta: "Yeni eklendi",
+        content: paragraphs
+      };
+    }
+
+    function updatePreview() {
+      els.previewImage.src = validImageUrl(els.image.value);
+      els.previewTag.textContent = els.tag.value.trim() || CATEGORY_LABELS[els.category.value];
+      els.previewTitle.textContent = els.title.value.trim() || "Başlık burada görünecek";
+      els.previewSummary.textContent = els.summary.value.trim() || "Kısa özet burada görünecek.";
+    }
+
+    function resetForm() {
+      editingIndex = null;
+      els.newsForm.reset();
+      els.category.value = "son";
+      els.tag.value = CATEGORY_LABELS[els.category.value];
+      els.formTitle.textContent = "Yeni haber ekle";
+      els.saveBtn.textContent = "Haberi siteye gönder";
+      updatePreview();
+    }
+
+    function renderNewsList() {
+      const news = getNews();
+      if (news.length === 0) {
+        els.newsList.innerHTML = `<div class="empty">Henüz admin panelinden haber eklenmedi.</div>`;
+        return;
+      }
+
+      els.newsList.innerHTML = news.map((item, index) => `
+        <article class="news-item">
+          <img src="${escapeHtml(item.img || FALLBACK_IMAGE)}" alt="${escapeHtml(item.title)}">
+          <div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.tag || "Haber")} • ${escapeHtml(item.meta || "Yeni eklendi")}</p>
+            <div class="mini-actions">
+              <button class="mini" type="button" data-edit="${index}">Düzenle</button>
+              <button class="mini delete" type="button" data-delete="${index}">Sil</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderCommentList() {
+      const comments = getComments();
+      const entries = Object.entries(comments).flatMap(([newsId, items]) => {
+        const news = getNews().find((item) => String(item.id) === newsId) || null;
+        const title = news ? news.title : BUILTIN_TITLES[newsId] || `Haber ID: ${newsId}`;
+        return Array.isArray(items)
+          ? items.map((comment) => ({ ...comment, newsId, newsTitle: title }))
+          : [];
+      });
+
+      if (entries.length === 0) {
+        els.commentList.innerHTML = `<div class="empty">Henüz yorum yapılmadı.</div>`;
+        return;
+      }
+
+      els.commentList.innerHTML = entries.map((comment) => `
+        <article class="comment-item">
+          <h3>${escapeHtml(comment.newsTitle)}</h3>
+          <strong>${escapeHtml(comment.name || "Misafir")}</strong>
+          <time>${escapeHtml(comment.date || "Yeni yorum")}</time>
+          <p>${escapeHtml(comment.text)}</p>
+          <div class="mini-actions" style="margin-top: 10px;">
+            <button class="mini delete" type="button" data-comment-news="${escapeHtml(comment.newsId)}" data-comment-id="${escapeHtml(comment.id)}">Yorumu kaldır</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderUserList() {
+      const users = getUsers();
+      if (users.length === 0) {
+        els.userList.innerHTML = `<div class="empty">Henüz kullanıcı hesabı oluşturulmadı.</div>`;
+        return;
+      }
+
+      els.userList.innerHTML = users.map((user, index) => `
+        <article class="user-item">
+          <div>
+            <h3>${escapeHtml(user.username)}</h3>
+            <p>Oluşturma: ${escapeHtml(user.createdAt || "-")} • Son giriş: ${escapeHtml(user.lastLogin || "-")}</p>
+            <span class="badge ${user.banned ? "banned" : ""}">${user.banned ? "Banlı" : "Aktif"}</span>
+          </div>
+          <button class="mini ${user.banned ? "" : "delete"}" type="button" data-user-toggle="${index}">
+            ${user.banned ? "Banı kaldır" : "Banla"}
+          </button>
+        </article>
+      `).join("");
+    }
+
+    function saveNews(event) {
+      event.preventDefault();
+      const item = buildNewsFromForm();
+      if (!item) {
+        showStatus(els.errorMsg, "Lütfen başlık, özet ve haber metnini doldur.");
+        return;
+      }
+
+      const news = getNews();
+      if (editingIndex === null) {
+        item.id = Date.now();
+        news.unshift(item);
+      } else {
+        item.id = news[editingIndex].id || Date.now();
+        news[editingIndex] = item;
+      }
+      setNews(news);
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+      showStatus(els.successMsg, "Haber kaydedildi. Ana siteyi yenilediğinde haber görünecek.");
+    }
+
+    function editNews(index) {
+      const item = getNews()[index];
+      if (!item) return;
+      editingIndex = index;
+      els.title.value = item.title || "";
+      els.category.value = item.cat || "son";
+      els.tag.value = item.tag || CATEGORY_LABELS[els.category.value];
+      els.image.value = item.img || "";
+      els.summary.value = item.summary || "";
+      els.content.value = Array.isArray(item.content) ? item.content.join("\n\n") : String(item.content || "");
+      els.formTitle.textContent = "Haberi düzenle";
+      els.saveBtn.textContent = "Değişiklikleri kaydet";
+      updatePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteNews(index) {
+      const news = getNews();
+      const deletedId = news[index] && news[index].id;
+      news.splice(index, 1);
+      setNews(news);
+      if (deletedId) {
+        const comments = getComments();
+        delete comments[String(deletedId)];
+        setComments(comments);
+      }
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+    }
+
+    els.loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (els.password.value.trim() === PASSWORD) {
+        sessionStorage.setItem("ddt_admin_logged_in", "1");
+        els.loginPanel.classList.add("hidden");
+        els.dashboard.classList.add("active");
+        els.loginError.classList.remove("active");
+        renderNewsList();
+        renderCommentList();
+        renderUserList();
+        resetForm();
+      } else {
+        showStatus(els.loginError, "Şifre hatalı.");
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("ddt_admin_logged_in");
+      els.dashboard.classList.remove("active");
+      els.loginPanel.classList.remove("hidden");
+      els.password.value = "";
+      els.password.focus();
+    });
+
+    els.newsForm.addEventListener("submit", saveNews);
+    document.getElementById("previewBtn").addEventListener("click", updatePreview);
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+    els.category.addEventListener("change", () => {
+      els.tag.value = CATEGORY_LABELS[els.category.value];
+      updatePreview();
+    });
+    ["input", "change"].forEach((eventName) => {
+      [els.title, els.tag, els.image, els.summary].forEach((field) => field.addEventListener(eventName, updatePreview));
+    });
+
+    els.newsList.addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-edit]");
+      const deleteButton = event.target.closest("[data-delete]");
+      if (editButton) editNews(Number(editButton.dataset.edit));
+      if (deleteButton && confirm("Bu haberi silmek istediğine emin misin?")) {
+        deleteNews(Number(deleteButton.dataset.delete));
+      }
+    });
+
+    els.commentList.addEventListener("click", (event) => {
+      const deleteButton = event.target.closest("[data-comment-id]");
+      if (!deleteButton) return;
+      const newsId = deleteButton.dataset.commentNews;
+      const commentId = deleteButton.dataset.commentId;
+      const comments = getComments();
+      comments[newsId] = (comments[newsId] || []).filter((comment) => String(comment.id) !== String(commentId));
+      if (comments[newsId].length === 0) delete comments[newsId];
+      setComments(comments);
+      renderCommentList();
+      renderUserList();
+    });
+
+    els.userList.addEventListener("click", (event) => {
+      const toggleButton = event.target.closest("[data-user-toggle]");
+      if (!toggleButton) return;
+
+      const users = getUsers();
+      const index = Number(toggleButton.dataset.userToggle);
+      if (!users[index]) return;
+
+      users[index].banned = !users[index].banned;
+      setUsers(users);
+      renderUserList();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!confirm("Admin panelinden eklenen tüm haberler silinsin mi?")) return;
+      const adminIds = getNews().map((item) => String(item.id));
+      const comments = getComments();
+      adminIds.forEach((id) => delete comments[id]);
+      setNews([]);
+      setComments(comments);
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", async () => {
+      const json = JSON.stringify(getNews(), null, 2);
+      try {
+        await navigator.clipboard.writeText(json);
+        alert("JSON panoya kopyalandı.");
+      } catch (error) {
+        prompt("JSON çıktısı:", json);
+      }
+    });
+
+    if (sessionStorage.getItem("ddt_admin_logged_in") === "1") {
+      els.loginPanel.classList.add("hidden");
+      els.dashboard.classList.add("active");
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+    }
+  </script>
+</body>
+</html>
