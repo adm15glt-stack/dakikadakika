@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DakikaDakika Yönetim Paneli</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f6f8; color: #101828; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    h1 { margin-top: 0; font-size: 24px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid #dce5f1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+    button { background: #145fe8; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    button:hover { background: #0f48b3; }
+    .success { color: #027a48; background: #ecfdf3; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
+    .login-screen { max-width: 400px; margin: 80px auto; text-align: center; }
+    .dashboard { display: none; }
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="container login-screen">
+    <h1>🔐 Yönetici Girişi</h1>
+    <p style="color:#666; margin-bottom:20px;">Yeni haber eklemek için giriş yap.</p>
+    <div class="form-group">
+      <input type="password" id="adminPass" placeholder="Şifrenizi girin" />
+    </div>
+    <button onclick="checkLogin()">Giriş Yap</button>
+    <p id="loginError" style="color:#ef4444; margin-top:10px; display:none;">Şifre hatalı!</p>
+  </div>
+
+  <div id="dashboard" class="container dashboard">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h1>📰 Yeni Haber Ekle</h1>
+      <button onclick="logout()" style="background:#ef4444; padding:8px 16px; font-size:13px;">Çıkış Yap</button>
+    </div>
+    <div class="form-group"><label>Haber Başlığı</label><input type="text" id="newsTitle" placeholder="Örn: iPhone 16 Tanıtıldı" /></div>
+    <div class="form-group">
+      <label>Kategori</label>
+      <select id="newsCat">
+        <option value="mobil">Mobil</option><option value="yapay-zeka">Yapay Zeka</option>
+        <option value="bilgisayar">Bilgisayar</option><option value="oyun">Oyun</option>
+        <option value="otomobil">Otomobil</option><option value="guvenlik">Güvenlik</option><option value="uzay">Uzay</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Haber Metni</label><textarea id="newsContent" rows="5" placeholder="Haber detaylarını buraya yaz..."></textarea></div>
+    <button onclick="saveNews()">Haberi Yayınla</button>
+    <div id="msgBox" class="success">✅ Haber başarıyla yayınlandı! Tüm cihazlarda 10 saniye içinde görünecek.</div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "admin123";
+    const JSONBIN_API_KEY = "$2a$10$c1uvgZ4b5TEH7jQhr25kYOwc7cHSPupMfGIwKYaTYYT7DuPQNWyuG";
+    const JSONBIN_NEWS_BIN = "6a4e186df5f4af5e297104dc";
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_NEWS_BIN}`;
+
+    function checkLogin() {
+      if(document.getElementById("adminPass").value === ADMIN_PASSWORD) {
+        sessionStorage.setItem("ddt_admin", "true"); showDashboard();
+      } else {
+        document.getElementById("loginError").style.display = "block";
+        setTimeout(() => document.getElementById("loginError").style.display = "none", 3000);
+      }
+    }
+    function showDashboard() { document.getElementById("loginScreen").style.display = "none"; document.getElementById("dashboard").style.display = "block"; }
+    function logout() { sessionStorage.removeItem("ddt_admin"); location.reload(); }
+    if(sessionStorage.getItem("ddt_admin") === "true") showDashboard();
+
+    async function saveNews() {
+      const title = document.getElementById("newsTitle").value;
+      const cat = document.getElementById("newsCat").value;
+      const content = document.getElementById("newsContent").value;
+      if(!title || !content) return alert("Lütfen tüm alanları doldur!");
+
+      const newNews = {
+        id: Date.now(), title, cat,
+        tag: document.getElementById("newsCat").options[document.getElementById("newsCat").selectedIndex].text,
+        content: content.split("\n").filter(p => p.trim()),
+        summary: content.substring(0, 100) + "...",
+        meta: "Az önce",
+        img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop"
+      };
+
+      try {
+        // JSONBin'den mevcut haberleri çek
+        const res = await fetch(`${JSONBIN_URL}/latest`, { headers: { 'X-Master-Key': JSONBIN_API_KEY }});
+        const data = await res.json();
+        const currentData = data.record || {};
+        const newsList = currentData.news || [];
+        
+        // Yeni haberi en başa ekle
+        newsList.unshift(newNews);
+        currentData.news = newsList;
+        
+        // JSONBin'e kaydet
+        await fetch(JSONBIN_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+          body: JSON.stringify(currentData)
+        });
+
+        document.getElementById("msgBox").style.display = "block";
+        setTimeout(() => document.getElementById("msgBox").style.display = "none", 4000);
+        document.getElementById("newsTitle").value = "";
+        document.getElementById("newsContent").value = "";
+      } catch(err) {
+        alert("Kayıt hatası: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DakikaDakika Teknoloji - güncel teknoloji haberleri." />
+  <title>DakikaDakika Teknoloji</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root { --accent: #145fe8; --bg: #eef3f8; --surface: #fff; --border: #dce5f1; --text: #101828; --radius: 8px; }
+    [data-theme="dark"] { --bg: #0a0e1a; --surface: #151b2e; --border: #2a3450; --text: #e8ecf4; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; transition: background 0.4s, color 0.4s; min-height: 100vh; }
+    .top-header { position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; background: rgba(255,255,255,0.92); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+    [data-theme="dark"] .top-header { background: rgba(21,27,46,0.92); }
+    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand-mark { width: 44px; height: 44px; background: #1D6EF5; border-radius: 12px; display: grid; place-items: center; }
+    .brand-name { font-family: "Space Grotesk"; font-weight: 700; font-size: 20px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .visitor-badge { display: flex; align-items: center; gap: 8px; padding: 0 14px; border-right: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+    .visitor-badge i { color: #1D6EF5; }
+    .icon-button { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.3s ease; color: var(--text); }
+    .icon-button:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .search { display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); width: 300px; }
+    .search input { border: none; outline: none; background: transparent; width: 100%; padding: 8px 0; color: var(--text); }
+    #robitBtn { position: fixed; bottom: 24px; right: 24px; z-index: 99999; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1D6EF5, #0f48b3); border: none; cursor: pointer; display: grid; place-items: center; font-size: 26px; box-shadow: 0 4px 20px rgba(29,110,245,0.4); animation: robitPopIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards; }
+    @keyframes robitPopIn { from { opacity: 0; transform: scale(0) rotate(-180deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
+    #robitPanel { position: fixed; bottom: 90px; right: 24px; z-index: 99998; width: 360px; max-height: 500px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; transform-origin: bottom right; }
+    #robitPanel.open { display: flex; animation: panelSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes panelSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .robit-head { background: linear-gradient(135deg, #1D6EF5, #0f48b3); padding: 16px; color: white; display: flex; align-items: center; gap: 12px; }
+    .robit-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 250px; }
+    .robit-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; animation: msgFadeIn 0.3s ease; }
+    @keyframes msgFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .robit-msg.bot { background: var(--bg); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .robit-msg.user { background: #1D6EF5; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .robit-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+    .robit-input-row input { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 10px; outline: none; background: var(--bg); color: var(--text); }
+    .robit-send-btn { background: #1D6EF5; color: white; border: none; width: 40px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: grid; place-items: center; }
+    .robit-send-btn:hover { background: #0f48b3; }
+  </style>
+</head>
+<body>
+  <header class="top-header">
+    <a href="#" class="logo">
+      <div class="brand-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <span class="brand-name">DakikaDakika</span>
+    </a>
+    <div class="header-actions">
+      <div class="visitor-badge"><i class="fas fa-users"></i><span id="liveVisitorCount">1</span></div>
+      <button class="icon-button" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+      <form class="search"><input type="search" placeholder="Haber ara..." /></form>
+      <button class="icon-button"><i class="fa-regular fa-user"></i></button>
+    </div>
+  </header>
+
+  <button id="robitBtn" title="Robit ile konuş">🤖</button>
+  <div id="robitPanel">
+    <div class="robit-head">
+      <span style="font-size: 24px;">🤖</span>
+      <div><strong>Robit</strong><br><small style="opacity:0.8">Çevrimiçi • Güncel Bilgi</small></div>
+    </div>
+    <div class="robit-messages" id="robitMessages">
+      <div class="robit-msg bot">Merhaba! Ben Robit. Teknoloji hakkında her şeyi sorabilirsin. 🚀</div>
+    </div>
+    <div class="robit-input-row">
+      <input type="text" id="robitInput" placeholder="Bir şeyler sor..." />
+      <button class="robit-send-btn" id="robitSend"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <script>
+    // ── API KEYLER ───────────────────────────────────────────────────
+    const GEMINI_API_KEY = "AQ.Ab8RN6JymIN1gBs4TiayqyJWYot_Auuben_7SrdShqaTwgqLug";
+    const GROQ_API_KEY = "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";
+    const ELEVENLABS_API_KEY = "57dde36b8e667bca2f2e7fab37b745893c27d544cd3062583fafd72f4b2a1290";
+    const JSONBIN_API_KEY = "$2a$10$c1uvgZ4b5TEH7jQhr25kYOwc7cHSPupMfGIwKYaTYYT7DuPQNWyuG";
+    
+    // ── JSONBIN BIN ID'LERI ──────────────────────────────────────────
+    const JSONBIN_BINS = {
+      news: "6a4e186df5f4af5e297104dc",
+      comments: "6a4029b1da38895dfe08a723",
+      users: "6a4e1d99da38895dfe3f8e96",
+      visitors: "6a4e1ddfda38895dfe3f8fc2",
+      reactions: "6a4e658cf5f4af5e2972997e" // 
+    };
+    const JSONBIN_URL_BASE = "https://api.jsonbin.io/v3/b/";
+
+    // ── JSONBIN FONKSİYONLARI ────────────────────────────────────────
+    async function jsonbinGet(binKey) {
+      try {
+        const r = await fetch(`${JSONBIN_URL_BASE}${JSONBIN_BINS[binKey]}/latest`, { headers: { 'X-Master-Key': JSONBIN_API_KEY }});
+        return (await r.json()).record || {};
+      } catch(e) { return {}; }
+    }
+    async function jsonbinSet(binKey, data) {
+      try {
+        await fetch(`${JSONBIN_URL_BASE}${JSONBIN_BINS[binKey]}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY }, body: JSON.stringify(data) });
+      } catch(e) {}
+    }
+
+    // ── ROBİT SİSTEM PROMPTU (GÜNCEL TARİH İLE) ─────────────────────
+    const TODAY = new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const ROBIT_SYSTEM = `Sen DakikaDakika Teknoloji sitesinin yapay zeka asistanısın. Adın Robit.
+BUGÜNÜN TARİHİ: ${TODAY}
+Güncel teknoloji haberleri, telefonlar, yapay zeka ve yazılım konusunda uzmansın. Türkçe, doğal, samimi ve kısa cevaplar ver. Asla robotik cümleler kurma. Site hakkında sorulursa: "Bu site DakikaDakika Ekibi tarafından yapılmıştır." de.`;
+
+    let robitHistory = [];
+    let isTyping = false;
+
+    // ── ROBİT MANTIKLARI ─────────────────────────────────────────────
+    const robitBtn = document.getElementById("robitBtn");
+    const robitPanel = document.getElementById("robitPanel");
+    const robitMsgs = document.getElementById("robitMessages");
+    const robitInput = document.getElementById("robitInput");
+    const robitSend = document.getElementById("robitSend");
+
+    robitBtn.addEventListener("click", () => {
+      robitPanel.classList.toggle("open");
+      if(robitPanel.classList.contains("open")) setTimeout(() => robitInput.focus(), 300);
+    });
+
+    async function callRobit(userText) {
+      if(isTyping || !userText.trim()) return;
+      isTyping = true;
+      addMessage("user", userText);
+      robitHistory.push({ role: "user", parts: [{ text: userText }] });
+      robitInput.value = "";
+
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "robit-msg bot";
+      typingDiv.textContent = "Yazıyor...";
+      robitMsgs.appendChild(typingDiv);
+      scrollToBottom();
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ systemInstruction: { parts: [{ text: ROBIT_SYSTEM }] }, contents: robitHistory, generationConfig: { temperature: 0.7, maxOutputTokens: 500 } })
+        });
+        if(res.status === 429) throw new Error("Gemini Limit");
+        if(!res.ok) throw new Error(`Gemini ${res.status}`);
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if(!reply) throw new Error("Boş Yanıt");
+        finishReply(reply);
+      } catch(err) {
+        console.warn("Gemini başarısız, Groq'a geçiliyor...", err);
+        typingDiv.textContent = "🔄 Alternatif beyin devreye giriyor...";
+        try {
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${GROQ_API_KEY}` },
+            body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{role:"system", content: ROBIT_SYSTEM}, ...robitHistory.map(m => ({role: m.role === 'user' ? 'user' : 'assistant', content: m.parts?.[0]?.text}))], temperature: 0.7, max_tokens: 500 })
+          });
+          if(!groqRes.ok) throw new Error("Groq Hatası");
+          const groqData = await groqRes.json();
+          const reply = groqData.choices?.[0]?.message?.content?.trim();
+          if(!reply) throw new Error("Boş Yanıt");
+          finishReply(reply);
+        } catch(groqErr) {
+          typingDiv.textContent = "❌ Şu an AI servisleri meşgul. Lütfen tekrar dene.";
+          isTyping = false;
+        }
+      }
+    }
+
+    function finishReply(reply) {
+      const typingDiv = robitMsgs.lastElementChild;
+      if(typingDiv) typingDiv.remove();
+      addMessage("bot", reply);
+      robitHistory.push({ role: "model", parts: [{ text: reply }] });
+      if(robitHistory.length > 20) robitHistory = robitHistory.slice(-16);
+      speakWithElevenLabs(reply);
+      isTyping = false;
+    }
+
+    function addMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = `robit-msg ${role}`;
+      div.textContent = text;
+      robitMsgs.appendChild(div);
+      scrollToBottom();
+    }
+    function scrollToBottom() { robitMsgs.scrollTop = robitMsgs.scrollHeight; }
+
+    robitSend.addEventListener("click", () => callRobit(robitInput.value));
+    robitInput.addEventListener("keydown", e => { if(e.key === "Enter") callRobit(robitInput.value); });
+
+    // ── SES SİSTEMİ ──────────────────────────────────────────────────
+    async function speakWithElevenLabs(text) {
+      if (!ELEVENLABS_API_KEY) return speakText(text);
+      try {
+        const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/iwpfjrZvRfQeasX45yfX`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVENLABS_API_KEY },
+          body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+        });
+        if (!r.ok) throw new Error();
+        const blob = await r.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+      } catch(e) { speakText(text); }
+    }
+    function speakText(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'tr-TR'; window.speechSynthesis.speak(u);
+    }
+
+    // ── TEMA ─────────────────────────────────────────────────────────
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      document.documentElement.setAttribute("data-theme", isDark ? "light" : "dark");
+      localStorage.setItem("theme", isDark ? "light" : "dark");
+    });
+    if(localStorage.getItem("theme") === "dark") document.documentElement.setAttribute("data-theme", "dark");
+
+    // ── ZİYARETÇİ SAYACI ─────────────────────────────────────────────
+    (async function() {
+      const MY_ID = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      async function get() { return await jsonbinGet("visitors"); }
+      async function set(d) { await jsonbinSet("visitors", d); }
+      let data = await get(); data.sessions = data.sessions || []; data.sessions.push({ id: MY_ID, t: Date.now() }); await set(data);
+      async function update() {
+        let d = await get(); d.sessions = d.sessions || [];
+        d.sessions = d.sessions.filter(s => Date.now() - s.t < 300000);
+        const mySession = d.sessions.find(s => s.id === MY_ID);
+        if(mySession) mySession.t = Date.now(); else d.sessions.push({ id: MY_ID, t: Date.now() });
+        await set(d);
+        const el = document.getElementById('liveVisitorCount');
+        if(el) el.textContent = Math.max(1, d.sessions.length);
+      }
+      await update();
+      setInterval(update, 10000);
+    })();
+
+    // ── HABER SENKRONİZASYONU (10 saniyede bir) ──────────────────────
+    setInterval(async () => {
+      try {
+        const data = await jsonbinGet("news");
+        if(data && data.news) localStorage.setItem("ddt_news", JSON.stringify(data.news));
+      } catch(e) {}
+    }, 10000);
+  </script>
+</body>
+</html>
