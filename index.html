@@ -2275,6 +2275,8 @@ KRİTİK KURAL — MUTLAKA UYGULA: Bugünün gerçek tarihi ${tarihMetni}. Şu a
 
 Kullanıcı sana güncel bir ürün ismi söylerse (örneğin "iPhone 17 Pro" veya "Galaxy S26" gibi) bunu ASLA "öyle bir ürün yok" diye reddetme — bu ürünler senin bilgi kesintinden sonra çıkmış olabilir, bu tamamen normal ve beklenen bir durumdur. Kullanıcının söylediği ürün ismini kabul ederek konuşmaya devam et, gereksiz yere eski model isimlerine geri dönme.
 
+GELECEK HAKKINDA KONUŞMA KURALI: Kullanıcı senden gelecekteki bir ürün, olay veya gelişme hakkında bilgi isterse ("2027'de hangi telefonlar çıkar", "gelecek yıl yapay zeka nasıl olur" gibi), "bilmiyorum" veya "gelecekten haberim yok" gibi cevaplar VERME. Bunun yerine geçmiş yıllardaki ürün/teknoloji çıkış hızını, marka alışkanlıklarını ve sektör trendlerini baz alarak MANTIKLI VE KARARLI bir tahmin sun. Tahmin yaptığını "muhtemelen", "büyük olasılıkla" gibi ifadelerle belirt ama cevabı belirsizlikle doldurma — net ve akıcı bir öngörü ver. Örneğin: telefon numaralandırmasında yıllık +1 artışı, yapay zeka modellerinde performans/hız artışı gibi bilinen trendleri kullanarak akıllıca tahminde bulun.
+
 Bu site hakkında soru sorulursa, site sahibi hakkında soru sorulursa, kimin yaptığı sorulursa cevabın:
 "Bu Site Dakika Dakika Ekibi Tarafından Yapılmıştır. 🚀"
 
@@ -2334,64 +2336,42 @@ async function callRobit(userMsg) {
 
   let reply = null;
 
-  // 1. ADIM: Gemini'yi dene
+  // Groq'a direkt istek at
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+    const groqMessages = robitHistory.map(m => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: m.parts?.[0]?.text || ""
+    }));
+
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: robitHistory,
-        systemInstruction: { parts: [{ text: ROBIT_SYSTEM }] },
-        generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+        model: GROQ_MODEL,
+        max_tokens: 600,
+        temperature: 0.7,
+        messages: [
+          { role: "system", content: ROBIT_SYSTEM },
+          ...groqMessages
+        ]
       })
     });
 
-    if (!res.ok) throw new Error(`Gemini Hatası: ${res.status}`);
-    const data = await res.json();
-    reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!reply) throw new Error("Gemini boş yanıt döndürdü");
+    if (!groqRes.ok) throw new Error(`Groq Hatası: ${groqRes.status}`);
+    const groqData = await groqRes.json();
+    reply = groqData.choices?.[0]?.message?.content?.trim();
+    if (!reply) throw new Error("Groq boş yanıt döndürdü");
 
-  } catch (geminiErr) {
-    console.warn("Gemini başarısız, Groq'a geçiliyor...", geminiErr);
-    typingEl.textContent = "Robit alternatif kaynağa bağlanıyor...";
-
-    // 2. ADIM: Groq'a geç (Gemini History formatını Groq formatına çevir)
-    try {
-      const groqMessages = robitHistory.map(m => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.parts?.[0]?.text || ""
-      }));
-
-      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          max_tokens: 600,
-          temperature: 0.7,
-          messages: [
-            { role: "system", content: ROBIT_SYSTEM },
-            ...groqMessages
-          ]
-        })
-      });
-
-      if (!groqRes.ok) throw new Error(`Groq Hatası: ${groqRes.status}`);
-      const groqData = await groqRes.json();
-      reply = groqData.choices?.[0]?.message?.content?.trim();
-      if (!reply) throw new Error("Groq boş yanıt döndürdü");
-
-    } catch (groqErr) {
-      console.error("Groq de başarısız:", groqErr);
-      typingEl.remove();
-      addRobitMsg("error", "Şu anda Robit'e ulaşılamıyor. Lütfen biraz sonra tekrar dene.");
-      robitLoading = false;
-      robitSend.disabled = false;
-      return;
-    }
+  } catch (groqErr) {
+    console.error("Groq başarısız:", groqErr);
+    typingEl.remove();
+    addRobitMsg("error", "Şu anda Robit'e ulaşılamıyor. Lütfen biraz sonra tekrar dene.");
+    robitLoading = false;
+    robitSend.disabled = false;
+    return;
   }
 
   // Cevap başarıyla alındı
