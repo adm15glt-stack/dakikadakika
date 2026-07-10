@@ -4,110 +4,1627 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DakikaDakika Yönetim Paneli</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    body { font-family: system-ui, sans-serif; background: #f4f6f8; color: #101828; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    h1 { margin-top: 0; font-size: 24px; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
-    input, textarea, select { width: 100%; padding: 10px; border: 1px solid #dce5f1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-    button { background: #145fe8; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-    button:hover { background: #0f48b3; }
-    .success { color: #027a48; background: #ecfdf3; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
-    .login-screen { max-width: 400px; margin: 80px auto; text-align: center; }
+    :root {
+      --accent: #145fe8;
+      --accent-dark: #0f48b3;
+      --danger: #dc2626;
+      --bg: #eef3f8;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fd;
+      --border: #dce5f1;
+      --text: #101828;
+      --soft: #475467;
+      --muted: #8a9bb1;
+      --shadow: 0 18px 50px rgba(16, 24, 40, 0.1);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 21px;
+      font-weight: 800;
+    }
+    .brand h1 {
+      font-size: clamp(20px, 3vw, 28px);
+      line-height: 1.1;
+    }
+    .brand p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .login {
+      width: min(440px, calc(100% - 32px));
+      margin: 10vh auto 0;
+      padding: 28px;
+    }
+    .login h2 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    .login p {
+      margin-bottom: 18px;
+      color: var(--soft);
+      font-size: 14px;
+    }
+
     .dashboard { display: none; }
+    .dashboard.active { display: block; }
+    .login.hidden { display: none; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-soft);
+    }
+    .card-head h2 {
+      font-size: 16px;
+    }
+    .card-body { padding: 18px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field.full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--soft);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 12px;
+      outline: 0;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea { min-height: 170px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(20, 95, 232, 0.1);
+    }
+    .hint {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 9px 13px;
+      font-weight: 800;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn.primary:hover { background: var(--accent-dark); }
+    .btn.secondary {
+      border-color: var(--border);
+      background: var(--surface-soft);
+      color: var(--soft);
+    }
+    .btn.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn.danger {
+      border-color: rgba(220, 38, 38, 0.18);
+      background: rgba(220, 38, 38, 0.08);
+      color: var(--danger);
+    }
+
+    .status {
+      display: none;
+      margin-top: 14px;
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status.active { display: block; }
+    .status.success {
+      background: #ecfdf3;
+      color: #027a48;
+      border: 1px solid #abefc6;
+    }
+    .status.error {
+      background: #fef3f2;
+      color: #b42318;
+      border: 1px solid #fecdca;
+    }
+
+    /* ── ÜST SEKME SİSTEMİ ────────────────────────────────────────── */
+    .main-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .main-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: var(--soft);
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .main-tab-btn:hover { color: var(--accent); }
+    .main-tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .main-tab-btn .tab-count {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--soft);
+    }
+    .main-tab-btn.active .tab-count {
+      background: rgba(20, 95, 232, 0.1);
+      color: var(--accent);
+      border-color: rgba(20, 95, 232, 0.2);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    /* ─────────────────────────────────────────────────────────────── */
+
+    /* ── RED YAZI YARDIMCISI ──────────────────────────────────────── */
+    .red-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(220,38,38,0.04), rgba(220,38,38,0.01));
+      padding: 14px;
+      margin-top: 16px;
+    }
+    .red-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .red-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #dc2626;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .red-title {
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .red-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .red-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .red-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--soft);
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+    .red-btn:hover {
+      border-color: #dc2626;
+      color: #dc2626;
+      background: rgba(220,38,38,0.04);
+    }
+    .red-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .red-output {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      color: var(--soft);
+      line-height: 1.6;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+      white-space: pre-wrap;
+    }
+    .red-output.active { display: block; }
+    .red-output .red-loading {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .red-apply-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+    .red-apply-row.active { display: flex; }
+    /* ─────────────────────────────────────────────────────────────── */
+
+    /* ── RED SABİT BUTON (Sağ Alt Köşe) ─────────────────────────────── */
+    #redFloatBtn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #1D6EF5;
+      border: 2px solid #dc2626;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(29,110,245,0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #redFloatBtn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 26px rgba(29,110,245,0.45);
+    }
+    #redFloatBtn svg { width: 30px; height: 30px; }
+    #redFloatBtn .red-close-icon { display: none; }
+    #redFloatBtn.open .red-open-icon { display: none; }
+    #redFloatBtn.open .red-close-icon { display: flex; }
+
+    #redFloatPanel {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      z-index: 9998;
+      width: 360px;
+      max-height: 70vh;
+      background: var(--surface);
+      border: 2px solid #dc2626;
+      border-radius: 16px;
+      box-shadow: 0 12px 48px rgba(220,38,38,0.15);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #redFloatPanel.open { display: flex; }
+
+    .red-panel-head {
+      background: #1D6EF5;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .red-panel-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #1D6EF5;
+      border: 2px solid #dc2626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .red-panel-avatar svg { width: 20px; height: 20px; }
+    .red-panel-title { color: #fff; font-weight: 800; font-size: 15px; }
+    .red-panel-subtitle { color: rgba(255,255,255,0.75); font-size: 11px; }
+
+    .red-panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .red-panel-field {
+      margin-bottom: 12px;
+    }
+    .red-panel-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--soft);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+    .red-panel-field select,
+    .red-panel-field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .red-panel-field textarea { min-height: 90px; resize: vertical; }
+
+    .red-panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .red-panel-actions .red-btn { font-size: 11px; padding: 6px 10px; }
+
+    .red-panel-output {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--soft);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      display: none;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .red-panel-output.active { display: block; }
+    /* ─────────────────────────────────────────────────────────────── */
+
+    .preview {
+      display: grid;
+      gap: 12px;
+    }
+    .preview-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius);
+      object-fit: cover;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+    }
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 5px;
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+    .preview h3 {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .preview p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    .news-list {
+      display: grid;
+      gap: 10px;
+      max-height: 520px;
+      overflow: auto;
+    }
+    .news-item {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+    .news-item img {
+      width: 72px;
+      height: 58px;
+      border-radius: 7px;
+      object-fit: cover;
+      background: var(--surface-soft);
+    }
+    .news-item h3 {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .news-item p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .news-item .mini-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mini {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--soft);
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .mini.delete { color: var(--danger); }
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--soft);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .comment-list {
+      display: grid;
+      gap: 10px;
+    }
+    .comment-item, .user-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+    }
+    .comment-item h3 {
+      margin-bottom: 5px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .comment-item strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .comment-item time {
+      display: block;
+      margin: 2px 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .comment-item p {
+      color: var(--soft);
+      font-size: 13px;
+    }
+    .user-list {
+      display: grid;
+      gap: 10px;
+    }
+    .user-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .user-item h3 {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .user-item p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 6px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #ecfdf3;
+      color: #027a48;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge.banned {
+      background: #fef3f2;
+      color: #b42318;
+    }
+
+    @media (max-width: 860px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .page {
+        width: min(100% - 22px, 1120px);
+        padding: 16px 0;
+      }
+      .login {
+        width: 100%;
+        margin-top: 5vh;
+        padding: 20px;
+      }
+      .card-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .actions, .card-head .actions {
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+      }
+      .news-item {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+      .news-item img {
+        width: 64px;
+        height: 54px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="loginScreen" class="container login-screen">
-    <h1>🔐 Yönetici Girişi</h1>
-    <p style="color:#666; margin-bottom:20px;">Yeni haber eklemek için giriş yap.</p>
-    <div class="form-group">
-      <input type="password" id="adminPass" placeholder="Şifrenizi girin" />
-    </div>
-    <button onclick="checkLogin()">Giriş Yap</button>
-    <p id="loginError" style="color:#ef4444; margin-top:10px; display:none;">Şifre hatalı!</p>
-  </div>
+  <main class="page">
+    <section class="panel login" id="loginPanel">
+      <h2>Yönetici girişi</h2>
+      <p>Yeni haber eklemek ve eklediğin haberleri düzenlemek için giriş yap.</p>
+      <form id="loginForm">
+        <label for="password">Erişim şifresi</label>
+        <input id="password" type="password" placeholder="Şifre" autocomplete="current-password" />
+        <div class="actions">
+          <button class="btn primary" type="submit">Giriş yap</button>
+        </div>
+      </form>
+      <div class="status error" id="loginError">Şifre hatalı.</div>
+    </section>
 
-  <div id="dashboard" class="container dashboard">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h1>📰 Yeni Haber Ekle</h1>
-      <button onclick="logout()" style="background:#ef4444; padding:8px 16px; font-size:13px;">Çıkış Yap</button>
-    </div>
-    <div class="form-group"><label>Haber Başlığı</label><input type="text" id="newsTitle" placeholder="Örn: iPhone 16 Tanıtıldı" /></div>
-    <div class="form-group">
-      <label>Kategori</label>
-      <select id="newsCat">
-        <option value="mobil">Mobil</option><option value="yapay-zeka">Yapay Zeka</option>
-        <option value="bilgisayar">Bilgisayar</option><option value="oyun">Oyun</option>
-        <option value="otomobil">Otomobil</option><option value="guvenlik">Güvenlik</option><option value="uzay">Uzay</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Haber Metni</label><textarea id="newsContent" rows="5" placeholder="Haber detaylarını buraya yaz..."></textarea></div>
-    <button onclick="saveNews()">Haberi Yayınla</button>
-    <div id="msgBox" class="success">✅ Haber başarıyla yayınlandı! Tüm cihazlarda 10 saniye içinde görünecek.</div>
-  </div>
+    <section class="dashboard" id="dashboard">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+          <div>
+            <h1>DakikaDakika Yönetim Paneli</h1>
+            <p>Eklenen haberler tarayıcıda <strong>ddt_news</strong> adıyla saklanır.</p>
+          </div>
+        </div>
+        <button class="btn secondary" type="button" id="logoutBtn">Çıkış yap</button>
+      </div>
+
+      <!-- ── ÜST SEKME NAVİGASYONU ─────────────────────────────────── -->
+      <div class="main-tabs">
+        <button class="main-tab-btn active" type="button" data-tab="haberler">
+          📰 Haberler <span class="tab-count" id="tabCountNews">0</span>
+        </button>
+        <button class="main-tab-btn" type="button" data-tab="kullanicilar">
+          👤 Kullanıcılar <span class="tab-count" id="tabCountUsers">0</span>
+        </button>
+        <button class="main-tab-btn" type="button" data-tab="yorumlar">
+          💬 Yorumlar <span class="tab-count" id="tabCountComments">0</span>
+        </button>
+      </div>
+
+      <!-- ══════════════ SEKME: HABERLER ══════════════ -->
+      <div class="tab-panel active" id="tabPanelHaberler">
+      <div class="dashboard-grid">
+        <section class="card">
+          <div class="card-head">
+            <h2 id="formTitle">Yeni haber ekle</h2>
+            <button class="btn secondary" type="button" id="resetBtn">Formu temizle</button>
+          </div>
+          <div class="card-body">
+            <form id="newsForm">
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="title">Haber başlığı</label>
+                  <input id="title" required maxlength="140" placeholder="Örn: Yeni yapay zeka modeli tanıtıldı" />
+                </div>
+
+                <div class="field">
+                  <label for="category">Kategori</label>
+                  <select id="category" required>
+                    <option value="son">Son Haberler</option>
+                    <option value="yapay-zeka">Yapay Zeka</option>
+                    <option value="mobil">Mobil</option>
+                    <option value="oyun">Oyun</option>
+                    <option value="otomobil">Otomobil</option>
+                    <option value="bilgisayar">Bilgisayar</option>
+                    <option value="guvenlik">Güvenlik</option>
+                    <option value="uzay">Uzay</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="tag">Etiket</label>
+                  <input id="tag" required placeholder="Örn: Yapay Zeka" />
+                </div>
+
+                <div class="field full">
+                  <label>Görsel</label>
+                  <div id="imageDropZone" style="
+                    border: 2px dashed var(--border);
+                    border-radius: var(--radius);
+                    padding: 18px;
+                    text-align: center;
+                    cursor: pointer;
+                    background: var(--surface-soft);
+                    transition: border-color 0.2s, background 0.2s;
+                    position: relative;
+                  ">
+                    <input type="file" id="imageFile" accept="image/*" style="display:none">
+                    <div id="imageDropContent">
+                      <div style="font-size:28px;margin-bottom:6px;">🖼️</div>
+                      <div style="font-size:13px;color:var(--soft);margin-bottom:8px;">Görseli buraya sürükle, yapıştır (Ctrl+V) veya seç</div>
+                      <button type="button" onclick="document.getElementById('imageFile').click()" style="
+                        background:var(--accent);color:#fff;border:none;border-radius:6px;
+                        padding:7px 16px;font-size:13px;cursor:pointer;
+                      ">Dosya Seç</button>
+                    </div>
+                    <img id="imagePreviewThumb" src="" alt="" style="display:none;max-height:140px;border-radius:6px;max-width:100%;margin-top:8px;">
+                    <div id="imageRemoveBtn" style="display:none;margin-top:8px;">
+                      <button type="button" onclick="clearImage()" style="
+                        background:none;border:1px solid var(--border);border-radius:6px;
+                        padding:5px 12px;font-size:12px;color:var(--soft);cursor:pointer;
+                      ">✕ Görseli kaldır</button>
+                    </div>
+                  </div>
+                  <input type="hidden" id="image">
+                  <div class="hint">Boş bırakırsan varsayılan teknoloji görseli kullanılır.</div>
+                </div>
+
+                <div class="field full">
+                  <label for="summary">Kısa özet</label>
+                  <input id="summary" required maxlength="220" placeholder="Haber kartlarında görünecek kısa açıklama" />
+                </div>
+
+                <div class="field full">
+                  <label for="content">Haber metni</label>
+                  <textarea id="content" required placeholder="Paragrafları boş satırla ayırabilirsin."></textarea>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn primary" type="submit" id="saveBtn">Haberi siteye gönder</button>
+                <button class="btn secondary" type="button" id="previewBtn">Önizlemeyi güncelle</button>
+              </div>
+              <div class="status success" id="successMsg">Haber kaydedildi. Ana siteyi yenilediğinde haber görünecek.</div>
+              <div class="status error" id="errorMsg">Lütfen zorunlu alanları doldur.</div>
+            </form>
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="card-head">
+            <h2>Önizleme</h2>
+          </div>
+          <div class="card-body preview">
+            <img class="preview-image" id="previewImage" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop" alt="Haber önizleme görseli" />
+            <span class="tag" id="previewTag">Son Haberler</span>
+            <h3 id="previewTitle">Başlık burada görünecek</h3>
+            <p id="previewSummary">Kısa özet burada görünecek.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="card-head">
+          <h2>Eklenen haberler</h2>
+          <div class="actions" style="margin: 0;">
+            <button class="btn secondary" type="button" id="exportBtn">JSON dışa aktar</button>
+            <button class="btn danger" type="button" id="clearBtn">Tümünü sil</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="news-list" id="newsList"></div>
+        </div>
+      </section>
+      </div>
+      <!-- ══════════════ /SEKME: HABERLER ══════════════ -->
+
+      <!-- ══════════════ SEKME: KULLANICILAR ══════════════ -->
+      <div class="tab-panel" id="tabPanelKullanicilar">
+        <section class="card">
+          <div class="card-head">
+            <h2>Kullanıcı yönetimi</h2>
+            <span class="hint" style="margin:0;">Banlanan kullanıcılar siteye giriş yapamaz</span>
+          </div>
+          <div class="card-body">
+            <div class="user-list" id="userList"></div>
+          </div>
+        </section>
+      </div>
+      <!-- ══════════════ /SEKME: KULLANICILAR ══════════════ -->
+
+      <!-- ══════════════ SEKME: YORUMLAR ══════════════ -->
+      <div class="tab-panel" id="tabPanelYorumlar">
+        <section class="card">
+          <div class="card-head">
+            <h2>Yorum yönetimi</h2>
+          </div>
+          <div class="card-body">
+            <div class="comment-list" id="commentList"></div>
+          </div>
+        </section>
+      </div>
+      <!-- ══════════════ /SEKME: YORUMLAR ══════════════ -->
+    </section>
+  </main>
 
   <script>
-    const ADMIN_PASSWORD = "admin123";
-    const JSONBIN_API_KEY = "$2a$10$c1uvgZ4b5TEH7jQhr25kYOwc7cHSPupMfGIwKYaTYYT7DuPQNWyuG";
-    const JSONBIN_NEWS_BIN = "6a4e186df5f4af5e297104dc";
-    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_NEWS_BIN}`;
+    // ── JSONBIN ENTEGRASYONU ─────────────────────────────────────────
+    const JSONBIN_MASTER_KEY = "$2a$10$c1uvgZ4b5TEH7jQhr25kYOwc7cHSPupMfGIwKYaTYYT7DuPQNWyuG";
+    const JSONBIN_BINS = {
+      news:     "6a4e186df5f4af5e297104dc",
+      comments: "6a4029b1da38895dfe08a723",
+      users:    "6a4e1d99da38895dfe3f8e96",
+      visitors: "6a4e1ddfda38895dfe3f8fc2"
+    };
+    const JSONBIN_BASE = "https://api.jsonbin.io/v3/b/";
 
-    function checkLogin() {
-      if(document.getElementById("adminPass").value === ADMIN_PASSWORD) {
-        sessionStorage.setItem("ddt_admin", "true"); showDashboard();
-      } else {
-        document.getElementById("loginError").style.display = "block";
-        setTimeout(() => document.getElementById("loginError").style.display = "none", 3000);
+    async function jsonbinGet(binKey) {
+      try {
+        const res = await fetch(JSONBIN_BASE + JSONBIN_BINS[binKey] + "/latest", {
+          headers: { "X-Master-Key": JSONBIN_MASTER_KEY }
+        });
+        if (!res.ok) throw new Error("JSONBin GET hatası: " + res.status);
+        const data = await res.json();
+        return data.record;
+      } catch (err) {
+        console.error(`JSONBin (${binKey}) okunamadı:`, err);
+        return null;
       }
     }
-    function showDashboard() { document.getElementById("loginScreen").style.display = "none"; document.getElementById("dashboard").style.display = "block"; }
-    function logout() { sessionStorage.removeItem("ddt_admin"); location.reload(); }
-    if(sessionStorage.getItem("ddt_admin") === "true") showDashboard();
 
-    async function saveNews() {
-      const title = document.getElementById("newsTitle").value;
-      const cat = document.getElementById("newsCat").value;
-      const content = document.getElementById("newsContent").value;
-      if(!title || !content) return alert("Lütfen tüm alanları doldur!");
+    async function jsonbinSet(binKey, value) {
+      try {
+        const res = await fetch(JSONBIN_BASE + JSONBIN_BINS[binKey], {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_MASTER_KEY
+          },
+          body: JSON.stringify(value)
+        });
+        if (!res.ok) throw new Error("JSONBin PUT hatası: " + res.status);
+        return true;
+      } catch (err) {
+        console.error(`JSONBin (${binKey}) yazılamadı:`, err);
+        return false;
+      }
+    }
 
-      const newNews = {
-        id: Date.now(), title, cat,
-        tag: document.getElementById("newsCat").options[document.getElementById("newsCat").selectedIndex].text,
-        content: content.split("\n").filter(p => p.trim()),
-        summary: content.substring(0, 100) + "...",
-        meta: "Az önce",
-        img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop"
+    async function syncFromJSONBin() {
+      const [newsData, commentsData, usersData] = await Promise.all([
+        jsonbinGet("news"),
+        jsonbinGet("comments"),
+        jsonbinGet("users")
+      ]);
+      if (newsData && Array.isArray(newsData.news)) {
+        localStorage.setItem("ddt_news", JSON.stringify(newsData.news));
+      }
+      if (commentsData && commentsData.comments) {
+        localStorage.setItem("ddt_comments", JSON.stringify(commentsData.comments));
+      }
+      if (usersData && Array.isArray(usersData.users)) {
+        localStorage.setItem("ddt_users", JSON.stringify(usersData.users));
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
+    // ── GÖRSEL YÜKLEME ──────────────────────────────────────────────
+    function setImageData(dataUrl) {
+      document.getElementById('image').value = dataUrl;
+      const thumb = document.getElementById('imagePreviewThumb');
+      thumb.src = dataUrl;
+      thumb.style.display = 'block';
+      document.getElementById('imageDropContent').style.display = 'none';
+      document.getElementById('imageRemoveBtn').style.display = 'block';
+      document.getElementById('imageDropZone').style.borderColor = 'var(--accent)';
+      document.getElementById('previewImage').src = dataUrl;
+    }
+
+    function clearImage() {
+      document.getElementById('image').value = '';
+      document.getElementById('imagePreviewThumb').src = '';
+      document.getElementById('imagePreviewThumb').style.display = 'none';
+      document.getElementById('imageDropContent').style.display = 'block';
+      document.getElementById('imageRemoveBtn').style.display = 'none';
+      document.getElementById('imageDropZone').style.borderColor = 'var(--border)';
+      document.getElementById('imageFile').value = '';
+    }
+
+    function fileToBase64(file) {
+      return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('imageFile').addEventListener('change', async function() {
+        if (this.files[0]) setImageData(await fileToBase64(this.files[0]));
+      });
+      const zone = document.getElementById('imageDropZone');
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; zone.style.background = '#eef3ff'; });
+      zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--border)'; zone.style.background = 'var(--surface-soft)'; });
+      zone.addEventListener('drop', async e => {
+        e.preventDefault();
+        zone.style.background = 'var(--surface-soft)';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) setImageData(await fileToBase64(file));
+      });
+      document.addEventListener('paste', async e => {
+        const items = e.clipboardData.items;
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            setImageData(await fileToBase64(item.getAsFile()));
+            break;
+          }
+        }
+      });
+    });
+    // ────────────────────────────────────────────────────────────────
+
+    const PASSWORD = "ADM\u0130N123";
+    const STORAGE_KEY = "ddt_news";
+    const COMMENT_STORAGE_KEY = "ddt_comments";
+    const USERS_STORAGE_KEY = "ddt_users";
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop";
+    const CATEGORY_LABELS = {
+      "son": "Son Haberler",
+      "yapay-zeka": "Yapay Zeka",
+      "mobil": "Mobil",
+      "oyun": "Oyun",
+      "otomobil": "Otomobil",
+      "bilgisayar": "Bilgisayar",
+      "guvenlik": "Güvenlik",
+      "uzay": "Uzay"
+    };
+    const BUILTIN_TITLES = {
+      "1": "Samsung Galaxy S26 FE Geekbench testinde görüldü",
+      "2": "Xiaomi 18 Pro yeni sızıntılarla gündemde",
+      "3": "OpenAI Türkçe dil desteğini güçlendiriyor",
+      "4": "Gemini Flash Türkçe kullanımda daha hızlı yanıt veriyor",
+      "5": "Android 16 kararlı sürümü için ilk cihaz listesi paylaşıldı",
+      "6": "AMD Ryzen 9 9950X3D test sonuçları sızdırıldı",
+      "7": "Yeni nesil taşınabilir oyun cihazları rekabeti büyütüyor",
+      "8": "Elektrikli otomobillerde hızlı şarj yarışı kızışıyor",
+      "9": "Yeni kimlik avı saldırıları yapay zeka ile daha inandırıcı hale geliyor",
+      "10": "Yeni uydu ağı kırsal internet erişimini hızlandırabilir"
+    };
+
+    let editingIndex = null;
+
+    const els = {
+      loginPanel: document.getElementById("loginPanel"),
+      dashboard: document.getElementById("dashboard"),
+      loginForm: document.getElementById("loginForm"),
+      password: document.getElementById("password"),
+      loginError: document.getElementById("loginError"),
+      newsForm: document.getElementById("newsForm"),
+      formTitle: document.getElementById("formTitle"),
+      title: document.getElementById("title"),
+      category: document.getElementById("category"),
+      tag: document.getElementById("tag"),
+      image: document.getElementById("image"),
+      summary: document.getElementById("summary"),
+      content: document.getElementById("content"),
+      saveBtn: document.getElementById("saveBtn"),
+      successMsg: document.getElementById("successMsg"),
+      errorMsg: document.getElementById("errorMsg"),
+      previewImage: document.getElementById("previewImage"),
+      previewTag: document.getElementById("previewTag"),
+      previewTitle: document.getElementById("previewTitle"),
+      previewSummary: document.getElementById("previewSummary"),
+      newsList: document.getElementById("newsList"),
+      commentList: document.getElementById("commentList"),
+      userList: document.getElementById("userList")
+    };
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getNews() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setNews(news) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(news));
+      jsonbinSet("news", { news });
+    }
+
+    function getComments() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(COMMENT_STORAGE_KEY) || "{}");
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function setComments(comments) {
+      localStorage.setItem(COMMENT_STORAGE_KEY, JSON.stringify(comments));
+      jsonbinSet("comments", { comments });
+    }
+
+    function getUsers() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+      jsonbinSet("users", { users });
+    }
+
+    function validImageUrl(url) {
+      if (!url.trim()) return FALLBACK_IMAGE;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+      } catch (error) {}
+      return FALLBACK_IMAGE;
+    }
+
+    function showStatus(element, message) {
+      element.textContent = message;
+      element.classList.add("active");
+      window.setTimeout(() => element.classList.remove("active"), 3200);
+    }
+
+    function buildNewsFromForm() {
+      const title = els.title.value.trim();
+      const cat = els.category.value;
+      const tag = els.tag.value.trim() || CATEGORY_LABELS[cat];
+      const summary = els.summary.value.trim();
+      const paragraphs = els.content.value
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean);
+
+      if (!title || !summary || paragraphs.length === 0) return null;
+
+      return {
+        title,
+        cat,
+        tag,
+        img: validImageUrl(els.image.value),
+        summary,
+        meta: "Yeni eklendi",
+        content: paragraphs
       };
+    }
+
+    function updatePreview() {
+      els.previewImage.src = validImageUrl(els.image.value);
+      els.previewTag.textContent = els.tag.value.trim() || CATEGORY_LABELS[els.category.value];
+      els.previewTitle.textContent = els.title.value.trim() || "Başlık burada görünecek";
+      els.previewSummary.textContent = els.summary.value.trim() || "Kısa özet burada görünecek.";
+    }
+
+    function resetForm() {
+      editingIndex = null;
+      els.newsForm.reset();
+      els.category.value = "son";
+      els.tag.value = CATEGORY_LABELS[els.category.value];
+      els.formTitle.textContent = "Yeni haber ekle";
+      els.saveBtn.textContent = "Haberi siteye gönder";
+      updatePreview();
+    }
+
+    function renderNewsList() {
+      const news = getNews();
+      const tabCountEl = document.getElementById("tabCountNews");
+      if (tabCountEl) tabCountEl.textContent = news.length;
+
+      if (news.length === 0) {
+        els.newsList.innerHTML = `<div class="empty">Henüz admin panelinden haber eklenmedi.</div>`;
+        return;
+      }
+
+      els.newsList.innerHTML = news.map((item, index) => `
+        <article class="news-item">
+          <img src="${escapeHtml(item.img || FALLBACK_IMAGE)}" alt="${escapeHtml(item.title)}">
+          <div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.tag || "Haber")} • ${escapeHtml(item.meta || "Yeni eklendi")}</p>
+            <div class="mini-actions">
+              <button class="mini" type="button" data-edit="${index}">Düzenle</button>
+              <button class="mini delete" type="button" data-delete="${index}">Sil</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderCommentList() {
+      const comments = getComments();
+      const entries = Object.entries(comments).flatMap(([newsId, items]) => {
+        const news = getNews().find((item) => String(item.id) === newsId) || null;
+        const title = news ? news.title : BUILTIN_TITLES[newsId] || `Haber ID: ${newsId}`;
+        return Array.isArray(items)
+          ? items.map((comment) => ({ ...comment, newsId, newsTitle: title }))
+          : [];
+      });
+
+      const tabCountEl = document.getElementById("tabCountComments");
+      if (tabCountEl) tabCountEl.textContent = entries.length;
+
+      if (entries.length === 0) {
+        els.commentList.innerHTML = `<div class="empty">Henüz yorum yapılmadı.</div>`;
+        return;
+      }
+
+      els.commentList.innerHTML = entries.map((comment) => `
+        <article class="comment-item">
+          <h3>${escapeHtml(comment.newsTitle)}</h3>
+          <strong>${escapeHtml(comment.name || "Misafir")}</strong>
+          <time>${escapeHtml(comment.date || "Yeni yorum")}</time>
+          <p>${escapeHtml(comment.text)}</p>
+          <div class="mini-actions" style="margin-top: 10px;">
+            <button class="mini delete" type="button" data-comment-news="${escapeHtml(comment.newsId)}" data-comment-id="${escapeHtml(comment.id)}">Yorumu kaldır</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderUserList() {
+      const users = getUsers();
+      const tabCountEl = document.getElementById("tabCountUsers");
+      if (tabCountEl) tabCountEl.textContent = users.length;
+
+      if (users.length === 0) {
+        els.userList.innerHTML = `<div class="empty">Henüz kullanıcı hesabı oluşturulmadı.</div>`;
+        return;
+      }
+
+      els.userList.innerHTML = users.map((user, index) => `
+        <article class="user-item">
+          <div>
+            <h3>${escapeHtml(user.username)}</h3>
+            <p>Oluşturma: ${escapeHtml(user.createdAt || "-")} • Son giriş: ${escapeHtml(user.lastLogin || "-")}</p>
+            <span class="badge ${user.banned ? "banned" : ""}">${user.banned ? "Banlı" : "Aktif"}</span>
+          </div>
+          <button class="mini ${user.banned ? "" : "delete"}" type="button" data-user-toggle="${index}">
+            ${user.banned ? "Banı kaldır" : "Banla"}
+          </button>
+        </article>
+      `).join("");
+    }
+
+    function saveNews(event) {
+      event.preventDefault();
+      const item = buildNewsFromForm();
+      if (!item) {
+        showStatus(els.errorMsg, "Lütfen başlık, özet ve haber metnini doldur.");
+        return;
+      }
+
+      const news = getNews();
+      if (editingIndex === null) {
+        item.id = Date.now();
+        news.unshift(item);
+      } else {
+        item.id = news[editingIndex].id || Date.now();
+        news[editingIndex] = item;
+      }
+      setNews(news);
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+      showStatus(els.successMsg, "Haber kaydedildi. Ana siteyi yenilediğinde haber görünecek.");
+    }
+
+    function editNews(index) {
+      const item = getNews()[index];
+      if (!item) return;
+      editingIndex = index;
+      els.title.value = item.title || "";
+      els.category.value = item.cat || "son";
+      els.tag.value = item.tag || CATEGORY_LABELS[els.category.value];
+      els.image.value = item.img || "";
+      els.summary.value = item.summary || "";
+      els.content.value = Array.isArray(item.content) ? item.content.join("\n\n") : String(item.content || "");
+      els.formTitle.textContent = "Haberi düzenle";
+      els.saveBtn.textContent = "Değişiklikleri kaydet";
+      updatePreview();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteNews(index) {
+      const news = getNews();
+      const deletedId = news[index] && news[index].id;
+      news.splice(index, 1);
+      setNews(news);
+      if (deletedId) {
+        const comments = getComments();
+        delete comments[String(deletedId)];
+        setComments(comments);
+      }
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+    }
+
+    els.loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (els.password.value.trim() === PASSWORD) {
+        sessionStorage.setItem("ddt_admin_logged_in", "1");
+        els.loginPanel.classList.add("hidden");
+        els.dashboard.classList.add("active");
+        els.loginError.classList.remove("active");
+        
+        // JSONBin'den en güncel veriyi çek
+        await syncFromJSONBin();
+        
+        renderNewsList();
+        renderCommentList();
+        renderUserList();
+        resetForm();
+      } else {
+        showStatus(els.loginError, "Şifre hatalı.");
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("ddt_admin_logged_in");
+      els.dashboard.classList.remove("active");
+      els.loginPanel.classList.remove("hidden");
+      els.password.value = "";
+      els.password.focus();
+    });
+
+    els.newsForm.addEventListener("submit", saveNews);
+    document.getElementById("previewBtn").addEventListener("click", updatePreview);
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+    els.category.addEventListener("change", () => {
+      els.tag.value = CATEGORY_LABELS[els.category.value];
+      updatePreview();
+    });
+    ["input", "change"].forEach((eventName) => {
+      [els.title, els.tag, els.image, els.summary].forEach((field) => field.addEventListener(eventName, updatePreview));
+    });
+
+    els.newsList.addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-edit]");
+      const deleteButton = event.target.closest("[data-delete]");
+      if (editButton) editNews(Number(editButton.dataset.edit));
+      if (deleteButton && confirm("Bu haberi silmek istediğine emin misin?")) {
+        deleteNews(Number(deleteButton.dataset.delete));
+      }
+    });
+
+    els.commentList.addEventListener("click", (event) => {
+      const deleteButton = event.target.closest("[data-comment-id]");
+      if (!deleteButton) return;
+      const newsId = deleteButton.dataset.commentNews;
+      const commentId = deleteButton.dataset.commentId;
+      const comments = getComments();
+      comments[newsId] = (comments[newsId] || []).filter((comment) => String(comment.id) !== String(commentId));
+      if (comments[newsId].length === 0) delete comments[newsId];
+      setComments(comments);
+      renderCommentList();
+      renderUserList();
+    });
+
+    els.userList.addEventListener("click", (event) => {
+      const toggleButton = event.target.closest("[data-user-toggle]");
+      if (!toggleButton) return;
+
+      const users = getUsers();
+      const index = Number(toggleButton.dataset.userToggle);
+      if (!users[index]) return;
+
+      users[index].banned = !users[index].banned;
+      setUsers(users);
+      renderUserList();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!confirm("Admin panelinden eklenen tüm haberler silinsin mi?")) return;
+      const adminIds = getNews().map((item) => String(item.id));
+      const comments = getComments();
+      adminIds.forEach((id) => delete comments[id]);
+      setNews([]);
+      setComments(comments);
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+      resetForm();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", async () => {
+      const json = JSON.stringify(getNews(), null, 2);
+      try {
+        await navigator.clipboard.writeText(json);
+        alert("JSON panoya kopyalandı.");
+      } catch (error) {
+        prompt("JSON çıktısı:", json);
+      }
+    });
+
+    if (sessionStorage.getItem("ddt_admin_logged_in") === "1") {
+      els.loginPanel.classList.add("hidden");
+      els.dashboard.classList.add("active");
+      syncFromJSONBin().then(() => {
+        renderNewsList();
+        renderCommentList();
+        renderUserList();
+        resetForm();
+      });
+    }
+
+    // ── ÜST SEKME GEÇİŞİ ─────────────────────────────────────────────
+    document.querySelectorAll(".main-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".main-tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+
+        btn.classList.add("active");
+        const tabName = btn.dataset.tab;
+        const panelMap = {
+          haberler: "tabPanelHaberler",
+          kullanicilar: "tabPanelKullanicilar",
+          yorumlar: "tabPanelYorumlar"
+        };
+        const panel = document.getElementById(panelMap[tabName]);
+        if (panel) panel.classList.add("active");
+      });
+    });
+    // ─────────────────────────────────────────────────────────────────
+
+    // ── RED: AI YAZI YARDIMCISI (Gemini + Groq Hibrit) ────────────────
+    const RED_GEMINI_API_KEY = "AQ.Ab8RN6JymIN1gBs4TiayqyJWYot_Auuben_7SrdShqaTwgqLug";
+    const RED_GEMINI_MODEL = "gemini-2.0-flash";
+    const RED_GROQ_API_KEY = "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";
+    const RED_GROQ_MODEL = "llama-3.3-70b-versatile";
+
+    function getRedDateContext() {
+      const now = new Date();
+      const gunler = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+      const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+      const tarihMetni = `${now.getDate()} ${aylar[now.getMonth()]} ${now.getFullYear()}, ${gunler[now.getDay()]}`;
+      const yil = now.getFullYear();
+      return `Bugünün gerçek tarihi ${tarihMetni}, şu an ${yil} yılındayız. Eğitim verin daha eski bir tarihte durmuş olabilir; ürün isimlerini (örneğin iPhone, Galaxy S serisi gibi) kendi hafızandaki en güncel modelle sınırlama — kullanıcı güncel bir ürün ismi söylerse (örneğin "iPhone 17" veya "Galaxy S26") bunu ASLA reddetme, bu ürünler senin bilgi kesintinden sonra çıkmış olabilir, normal karşıla ve o şekilde konuşmaya devam et.`;
+    }
+
+    // Gemini + Groq hibrit çağrısı (Gemini önce, olmazsa Groq'a geç)
+    async function callRED(promptText) {
+      const dateContext = getRedDateContext();
+      const fullPrompt = `${dateContext}\n\n${promptText}`;
+
+      // 1. ADIM: Gemini'yi dene
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${RED_GEMINI_MODEL}:generateContent?key=${RED_GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 500 }
+          })
+        });
+        if (!res.ok) throw new Error(`Gemini hatası: ${res.status}`);
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!text) throw new Error("Gemini boş yanıt döndürdü");
+        return text;
+      } catch (geminiErr) {
+        console.warn("RED: Gemini başarısız, Groq'a geçiliyor...", geminiErr);
+      }
+
+      // 2. ADIM: Groq'a geç
+      try {
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${RED_GROQ_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: RED_GROQ_MODEL,
+            max_tokens: 500,
+            temperature: 0.7,
+            messages: [
+              { role: "system", content: dateContext },
+              { role: "user", content: promptText }
+            ]
+          })
+        });
+        if (!groqRes.ok) throw new Error(`Groq hatası: ${groqRes.status}`);
+        const groqData = await groqRes.json();
+        const text = groqData.choices?.[0]?.message?.content?.trim();
+        if (!text) throw new Error("Groq boş yanıt döndürdü");
+        return text;
+      } catch (groqErr) {
+        console.error("RED: Groq da başarısız:", groqErr);
+        throw new Error("RED şu an yanıt veremiyor. Lütfen biraz sonra tekrar dene.");
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+  </script>
+
+  <!-- ── RED SABİT BUTON VE PANEL (Sağ Alt Köşe) ────────────────────── -->
+  <button id="redFloatBtn" title="RED ile konuş" aria-label="RED Yazı Yardımcısı">
+    <span class="red-open-icon" style="display:flex;">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Robot kafası -->
+        <rect x="5" y="8" width="14" height="12" rx="3" fill="none" stroke="#dc2626" stroke-width="1.8"/>
+        <line x1="12" y1="8" x2="12" y2="4" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="3" r="1.3" fill="#dc2626"/>
+        <circle cx="9" cy="13.5" r="1.4" fill="#dc2626"/>
+        <circle cx="15" cy="13.5" r="1.4" fill="#dc2626"/>
+        <path d="M9 17.5 Q12 19.5 15 17.5" stroke="#dc2626" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <line x1="2" y1="12" x2="5" y2="12" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="19" y1="12" x2="22" y2="12" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="red-close-icon" style="color:#fff;font-size:22px;">✕</span>
+  </button>
+
+  <div id="redFloatPanel" role="dialog" aria-label="RED Yazı Yardımcısı">
+    <div class="red-panel-head">
+      <div class="red-panel-avatar">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="8" width="14" height="12" rx="3" fill="none" stroke="#dc2626" stroke-width="1.8"/>
+          <line x1="12" y1="8" x2="12" y2="4" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="3" r="1.3" fill="#dc2626"/>
+          <circle cx="9" cy="13.5" r="1.4" fill="#dc2626"/>
+          <circle cx="15" cy="13.5" r="1.4" fill="#dc2626"/>
+          <path d="M9 17.5 Q12 19.5 15 17.5" stroke="#dc2626" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="red-panel-title">RED</div>
+        <div class="red-panel-subtitle">Yazı Yardımcısı</div>
+      </div>
+    </div>
+    <div class="red-panel-body">
+      <div class="red-panel-field">
+        <label>Ne üzerinde çalışayım?</label>
+        <select id="redFloatMode">
+          <option value="summary">📝 Özet öner</option>
+          <option value="improve">✨ Metni iyileştir</option>
+          <option value="title">📰 Başlık öner</option>
+          <option value="tag">🏷️ Etiket öner</option>
+          <option value="custom">💬 Serbest soru sor</option>
+        </select>
+      </div>
+      <div class="red-panel-field" id="redFloatCustomField" style="display:none;">
+        <label>Sorunu yaz</label>
+        <textarea id="redFloatCustomInput" placeholder="Örn: Bu haber için 3 alternatif başlık öner"></textarea>
+      </div>
+      <div class="red-panel-actions">
+        <button class="red-btn" type="button" id="redFloatRunBtn">▶ Çalıştır</button>
+      </div>
+      <div class="red-panel-output" id="redFloatOutput"></div>
+      <div class="red-apply-row" id="redFloatApplyRow" style="margin-top:10px;">
+        <button class="btn primary" type="button" id="redFloatApplyBtn" style="min-height:32px;padding:6px 12px;font-size:12px;">Forma uygula</button>
+        <button class="btn secondary" type="button" id="redFloatDismissBtn" style="min-height:32px;padding:6px 12px;font-size:12px;">Kapat</button>
+      </div>
+    </div>
+  </div>
+  <!-- ─────────────────────────────────────────────────────────────── -->
+
+  <script>
+    // ── RED SABİT PANEL MANTIĞI (HTML'den SONRA çalışır) ─────────────
+    const redFloatBtn = document.getElementById("redFloatBtn");
+    const redFloatPanel = document.getElementById("redFloatPanel");
+    const redFloatMode = document.getElementById("redFloatMode");
+    const redFloatCustomField = document.getElementById("redFloatCustomField");
+    const redFloatCustomInput = document.getElementById("redFloatCustomInput");
+    const redFloatOutput = document.getElementById("redFloatOutput");
+    const redFloatApplyRow = document.getElementById("redFloatApplyRow");
+    let redFloatOpen = false;
+    let redFloatSuggestion = null;
+    let redFloatTargetField = null;
+
+    redFloatBtn.addEventListener("click", () => {
+      redFloatOpen = !redFloatOpen;
+      redFloatBtn.classList.toggle("open", redFloatOpen);
+      redFloatPanel.classList.toggle("open", redFloatOpen);
+    });
+
+    redFloatMode.addEventListener("change", () => {
+      redFloatCustomField.style.display = redFloatMode.value === "custom" ? "block" : "none";
+    });
+
+    document.getElementById("redFloatRunBtn").addEventListener("click", async () => {
+      const mode = redFloatMode.value;
+      const titleField = document.getElementById("title");
+      const contentField = document.getElementById("content");
+      const title = titleField ? titleField.value.trim() : "";
+      const content = contentField ? contentField.value.trim() : "";
+
+      redFloatOutput.innerHTML = '<span class="red-loading">RED düşünüyor...</span>';
+      redFloatOutput.classList.add("active");
+      redFloatApplyRow.classList.remove("active");
+
+      let promptText = "";
+      let targetField = null;
 
       try {
-        // JSONBin'den mevcut haberleri çek
-        const res = await fetch(`${JSONBIN_URL}/latest`, { headers: { 'X-Master-Key': JSONBIN_API_KEY }});
-        const data = await res.json();
-        const currentData = data.record || {};
-        const newsList = currentData.news || [];
-        
-        // Yeni haberi en başa ekle
-        newsList.unshift(newNews);
-        currentData.news = newsList;
-        
-        // JSONBin'e kaydet
-        await fetch(JSONBIN_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-          body: JSON.stringify(currentData)
-        });
+        switch (mode) {
+          case "summary":
+            if (!title && !content) throw new Error("Önce formda başlık veya haber metni yaz.");
+            promptText = `Aşağıdaki haber için Türkçe, en fazla 220 karakterlik, dikkat çekici bir kısa özet yaz. Sadece özeti yaz, başka açıklama ekleme.\n\nBaşlık: ${title}\n\nMetin: ${content}`;
+            targetField = "summary";
+            break;
 
-        document.getElementById("msgBox").style.display = "block";
-        setTimeout(() => document.getElementById("msgBox").style.display = "none", 4000);
-        document.getElementById("newsTitle").value = "";
-        document.getElementById("newsContent").value = "";
-      } catch(err) {
-        alert("Kayıt hatası: " + err.message);
+          case "improve":
+            if (!content) throw new Error("Önce formda haber metnini yaz.");
+            promptText = `Aşağıdaki Türkçe haber metnini daha akıcı, profesyonel ve haber diline uygun şekilde yeniden yaz. Anlamı değiştirme, sadece dili ve akıcılığı iyileştir. Paragrafları boş satırla ayır. Sadece iyileştirilmiş metni yaz, başka açıklama ekleme.\n\n${content}`;
+            targetField = "content";
+            break;
+
+          case "title":
+            if (!content && !title) throw new Error("Önce formda haber metnini veya mevcut başlığı yaz.");
+            promptText = `Aşağıdaki haber için dikkat çekici, en fazla 100 karakterlik bir Türkçe haber başlığı öner. Sadece başlığı yaz, tırnak işareti veya başka açıklama ekleme.\n\nMevcut başlık: ${title}\n\nMetin: ${content}`;
+            targetField = "title";
+            break;
+
+          case "tag":
+            if (!title && !content) throw new Error("Önce formda başlık veya haber metni yaz.");
+            promptText = `Aşağıdaki haber için tek kelimelik veya en fazla 2 kelimelik kısa bir Türkçe etiket öner (örnek: "Yapay Zeka", "Mobil", "Oyun" gibi). Sadece etiketi yaz, tırnak işareti veya başka açıklama ekleme.\n\nBaşlık: ${title}\n\nMetin: ${content}`;
+            targetField = "tag";
+            break;
+
+          case "custom":
+            const customQ = redFloatCustomInput.value.trim();
+            if (!customQ) throw new Error("Lütfen bir soru yaz.");
+            promptText = `Sen bir teknoloji haber sitesinin editör asistanısın. Şu soruya Türkçe, kısa ve net cevap ver: ${customQ}\n\n(Bağlam - form başlığı: ${title}, form metni: ${content})`;
+            targetField = null;
+            break;
+        }
+
+        const suggestion = await callRED(promptText);
+        redFloatSuggestion = suggestion.replace(/^["']|["']$/g, "");
+        redFloatTargetField = targetField;
+
+        redFloatOutput.textContent = redFloatSuggestion;
+
+        if (targetField) {
+          redFloatApplyRow.classList.add("active");
+        } else {
+          redFloatApplyRow.classList.remove("active");
+        }
+
+      } catch (err) {
+        redFloatOutput.textContent = `⚠️ ${err.message || "RED şu an yanıt veremedi. Lütfen tekrar dene."}`;
+        redFloatApplyRow.classList.remove("active");
+        console.error(err);
       }
-    }
+    });
+
+    document.getElementById("redFloatApplyBtn").addEventListener("click", () => {
+      if (!redFloatSuggestion || !redFloatTargetField) return;
+      const field = document.getElementById(redFloatTargetField);
+      if (field) field.value = redFloatSuggestion;
+      redFloatOutput.classList.remove("active");
+      redFloatApplyRow.classList.remove("active");
+    });
+
+    document.getElementById("redFloatDismissBtn").addEventListener("click", () => {
+      redFloatOutput.classList.remove("active");
+      redFloatApplyRow.classList.remove("active");
+    });
+    // ─────────────────────────────────────────────────────────────────
   </script>
+
 </body>
 </html>
