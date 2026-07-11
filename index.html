@@ -616,7 +616,7 @@
       font-weight: 700;
     }
     .reaction-btn.pop {
-      animation: reactionPop 0.4s ease;
+      animation: reactionPop 1s ease;
     }
     @keyframes reactionPop {
       0% { transform: scale(1); }
@@ -1849,6 +1849,42 @@
       renderComments(activeNewsId);
     });
 
+    // Eşya, hayvan, marka gibi isim OLMAYAN kelimeler (kullanıcı adı olarak kabul edilmez)
+    const NON_HUMAN_NAMES = [
+      "kedi", "köpek", "kuş", "balık", "tavşan", "hamster", "papağan",
+      "masa", "sandalye", "telefon", "bilgisayar", "araba", "bilgisayar",
+      "samsung", "iphone", "apple", "google", "windows", "android",
+      "test", "deneme", "admin", "user", "misafir", "anonim", "isimsiz",
+      "robot", "yapay", "zeka", "oyuncu", "gamer", "player",
+      "elma", "armut", "muz", "çilek", "karpuz",
+      "masa1", "abc", "xyz", "asdf", "qwerty"
+    ];
+
+    function isNonHumanName(name) {
+      const lower = name.toLocaleLowerCase("tr-TR").trim();
+      return NON_HUMAN_NAMES.some(word => lower === word || lower.includes(word));
+    }
+
+    // Basit / zayıf şifreleri tespit eder (12345, aaaaa, qwerty gibi)
+    function isWeakPassword(password) {
+      const lower = password.toLowerCase();
+
+      // Tamamen aynı karakterden oluşuyor (aaaaa, 11111 gibi)
+      if (/^(.)\1+$/.test(password)) return true;
+
+      // Ardışık sayı dizisi (12345, 123456, 654321 gibi)
+      if (/^(0123456789|123456789|12345678|1234567|123456|12345|1234|0987654321|987654321|98765432|9876543|987654|98765)/.test(password)) return true;
+
+      // Klavye sıra dizileri
+      const commonWeak = ["qwerty", "asdfgh", "zxcvbn", "password", "sifre", "parola", "123123", "111111", "000000", "abcdef", "abcabc"];
+      if (commonWeak.some(weak => lower.includes(weak))) return true;
+
+      // Çok kısa (4 karakterden az)
+      if (password.length < 4) return true;
+
+      return false;
+    }
+
     els.authForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const username = els.authUsername.value.trim();
@@ -1865,6 +1901,16 @@
       
       if (hasBadWords(username)) {
         showMessage(els.authError, "Kullanıcı adında argo veya kötü söz kullanılamaz.");
+        return;
+      }
+
+      if (isNonHumanName(username)) {
+        showMessage(els.authError, "Lütfen gerçek bir insan ismi kullan. Eşya, hayvan veya marka isimleri kabul edilmiyor.");
+        return;
+      }
+
+      if (isWeakPassword(password)) {
+        showMessage(els.authError, "Şifren çok basit. Lütfen '12345' veya 'aaaaa' gibi kolay tahmin edilen şifreler kullanma.");
         return;
       }
 
@@ -2104,6 +2150,11 @@
     transition: transform 0.2s, box-shadow 0.2s;
     font-size: 24px;
     pointer-events: all !important;
+    animation: robitPopIn 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes robitPopIn {
+    from { opacity: 0; transform: scale(0) rotate(-180deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
   }
   #robitBtn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(29,110,245,0.5); }
   #robitBtn .robit-icon-open  { display: flex; }
@@ -2120,13 +2171,20 @@
     box-shadow: 0 12px 48px rgba(29,110,245,0.18);
     display: none; flex-direction: column;
     overflow: hidden;
-    animation: robitSlideIn 0.25s ease;
     pointer-events: all !important;
   }
-  #robitPanel.open { display: flex; }
+  #robitPanel.open { display: flex; animation: robitSlideIn 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
   @keyframes robitSlideIn {
     from { opacity:0; transform: translateY(16px) scale(0.97); }
     to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .robit-msg {
+    animation: robitMsgFadeIn 1s ease;
+  }
+  @keyframes robitMsgFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .robit-head {
@@ -2257,6 +2315,37 @@ const GEMINI_MODEL   = "gemini-2.0-flash";
 const GROQ_API_KEY   = "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";
 const GROQ_MODEL     = "llama-3.3-70b-versatile";
 
+const GOOGLE_SEARCH_API_KEY = "AIzaSyDwQ7lKz1gv94uKdeM05DuSrW-v3GgJBNU";
+const GOOGLE_SEARCH_CX = "14d75061717cb447e";
+
+// Google'da arama yapıp en güncel sonuçları getirir
+async function googleSearch(query) {
+  try {
+    const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_CX}&q=${encodeURIComponent(query)}&num=5`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Google Search hatası: ${res.status}`);
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) return null;
+
+    return data.items.map(item => `${item.title}: ${item.snippet}`).join("\n\n");
+  } catch (err) {
+    console.warn("Google Search başarısız:", err);
+    return null;
+  }
+}
+
+// Kullanıcının mesajının güncel/gerçek zamanlı bilgi gerektirip gerektirmediğini tahmin eder
+function needsWebSearch(msg) {
+  const searchTriggers = [
+    "bugün", "şu an", "güncel", "son dakika", "haber", "fiyat", "ne zaman çıkacak",
+    "çıktı mı", "var mı", "kaç para", "yeni model", "son sürüm", "en son",
+    "hangi yıl", "tarih", "duyuru", "açıklandı mı", "piyasada"
+  ];
+  const lowerMsg = msg.toLowerCase();
+  return searchTriggers.some(trigger => lowerMsg.includes(trigger));
+}
+
 const ELEVENLABS_API_KEY = "57dde36b8e667bca2f2e7fab37b745893c27d544cd3062583fafd72f4b2a1290";
 const ELEVENLABS_VOICE_ID = "iwpfjrZvRfQeasX45yfX";
 const ELEVENLABS_MODEL = "eleven_multilingual_v2";
@@ -2320,7 +2409,7 @@ function addRobitMsg(role, text) {
   return div;
 }
 
-// Gemini + Groq Hibrit API çağrısı (Gemini önce, olmazsa Groq'a geç)
+// Google Search + Groq API çağrısı
 async function callRobit(userMsg) {
   if (robitLoading) return;
   robitLoading = true;
@@ -2335,13 +2424,29 @@ async function callRobit(userMsg) {
   const typingEl = addRobitMsg("bot typing", "Robit yazıyor...");
 
   let reply = null;
+  let searchContext = "";
 
-  // Groq'a direkt istek at
+  // Güncel bilgi gerektiren bir soruysa önce Google'da ara
+  if (needsWebSearch(userMsg)) {
+    typingEl.textContent = "Robit güncel bilgi arıyor...";
+    const searchResults = await googleSearch(userMsg);
+    if (searchResults) {
+      searchContext = `\n\nGüncel web arama sonuçları (bu bilgiyi cevabında kullan):\n${searchResults}`;
+    }
+    typingEl.textContent = "Robit yazıyor...";
+  }
+
+  // Groq'a istek at
   try {
     const groqMessages = robitHistory.map(m => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.parts?.[0]?.text || ""
     }));
+
+    // Son kullanıcı mesajına arama sonuçlarını ekle (varsa)
+    if (searchContext && groqMessages.length > 0) {
+      groqMessages[groqMessages.length - 1].content += searchContext;
+    }
 
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
