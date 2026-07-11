@@ -58,6 +58,46 @@
     body.modal-open { overflow: hidden; }
     body.modal-open #robitBtn,
     body.modal-open #robitPanel { pointer-events: all !important; }
+
+    /* ── TOAST BİLDİRİM SİSTEMİ ────────────────────────────────────── */
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #101828;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+      animation: toastIn 1s cubic-bezier(0.34, 1.2, 0.64, 1);
+      max-width: 320px;
+    }
+    .toast-item.toast-closing {
+      animation: toastOut 1s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+    }
+    .toast-item i { color: #4ADE80; font-size: 16px; flex-shrink: 0; }
+    .toast-item.toast-error i { color: #F87171; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
+    }
+    /* ─────────────────────────────────────────────────────────────── */
     a { color: inherit; text-decoration: none; }
     button, input { font: inherit; }
     img { display: block; max-width: 100%; }
@@ -299,12 +339,17 @@
       border-radius: var(--radius);
       background: var(--surface);
       cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 1s cubic-bezier(0.34, 1.2, 0.64, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+      animation: cardFadeIn 1s ease backwards;
+    }
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .hero-main:hover, .side-card:hover, .news-card:hover, .list-card:hover {
       border-color: rgba(20, 95, 232, 0.45);
       box-shadow: var(--shadow);
-      transform: translateY(-2px);
+      transform: translateY(-6px) scale(1.02);
     }
     .hero-main {
       position: relative;
@@ -522,8 +567,25 @@
       display: none;
       background: rgba(16, 24, 40, 0.52);
       backdrop-filter: blur(4px);
+      opacity: 0;
+      transition: opacity 1s ease;
     }
-    .overlay.active { display: block; }
+    .overlay.active {
+      display: block;
+      opacity: 1;
+      animation: overlayFadeIn 1s ease;
+    }
+    @keyframes overlayFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .overlay.closing {
+      animation: overlayFadeOut 1s ease;
+    }
+    @keyframes overlayFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
     .modal {
       width: min(760px, calc(100% - 32px));
       max-height: calc(100vh - 40px);
@@ -532,6 +594,18 @@
       border-radius: 12px;
       background: #fff;
       box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
+      animation: modalSlideIn 1s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .overlay.closing .modal {
+      animation: modalSlideOut 1s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    @keyframes modalSlideOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(40px) scale(0.96); }
     }
     .modal-toolbar {
       position: sticky;
@@ -1678,6 +1752,15 @@
       renderNav();
       renderHero();
       renderCards();
+      applyStaggerAnimation();
+    }
+
+    // Kartlara sırayla artan animasyon gecikmesi uygular (stagger efekti)
+    function applyStaggerAnimation() {
+      const cards = document.querySelectorAll(".hero-main, .side-card, .news-card, .list-card");
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${Math.min(index * 0.05, 0.6)}s`;
+      });
     }
 
     function openNews(id) {
@@ -1768,40 +1851,98 @@
       const platform = btn.dataset.platform;
 
       let shareLink = "";
+      const platformNames = { x: "X (Twitter)", whatsapp: "WhatsApp", facebook: "Facebook", instagram: "Instagram" };
 
       switch (platform) {
         case "x":
           shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`;
           window.open(shareLink, "_blank", "noopener,noreferrer");
+          showToast(`${platformNames.x}'te paylaşım penceresi açıldı`);
+          sendBrowserNotification("Haber Paylaşıldı 📤", `"${shareTitle}" ${platformNames.x}'te paylaşılıyor`, cardImage(news));
           break;
 
         case "whatsapp":
           shareLink = `https://wa.me/?text=${encodeURIComponent(shareTitle + " - " + shareUrl)}`;
           window.open(shareLink, "_blank", "noopener,noreferrer");
+          showToast(`${platformNames.whatsapp}'ta paylaşım penceresi açıldı`);
+          sendBrowserNotification("Haber Paylaşıldı 📤", `"${shareTitle}" ${platformNames.whatsapp}'ta paylaşılıyor`, cardImage(news));
           break;
 
         case "facebook":
           shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
           window.open(shareLink, "_blank", "noopener,noreferrer");
+          showToast(`${platformNames.facebook}'ta paylaşım penceresi açıldı`);
+          sendBrowserNotification("Haber Paylaşıldı 📤", `"${shareTitle}" ${platformNames.facebook}'ta paylaşılıyor`, cardImage(news));
           break;
 
         case "instagram":
           // Instagram doğrudan link paylaşımını desteklemiyor, panoya kopyala
           navigator.clipboard.writeText(`${shareTitle} - ${shareUrl}`).then(() => {
-            alert("Link kopyalandı! Instagram'da hikayene veya DM'ine yapıştırabilirsin. 📋");
+            showToast("Link kopyalandı! Instagram'da hikayene veya DM'ine yapıştırabilirsin 📋");
+            sendBrowserNotification("Haber Paylaşıldı 📤", `"${shareTitle}" için link kopyalandı`, cardImage(news));
           }).catch(() => {
-            alert("Kopyalama başarısız oldu. Linki manuel kopyalayabilirsin: " + shareUrl);
+            showToast("Kopyalama başarısız oldu.", "error");
           });
           break;
       }
     });
     // ─────────────────────────────────────────────────────────────────
 
+    // ── TOAST BİLDİRİM SİSTEMİ ────────────────────────────────────────
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast-item ${type === "error" ? "toast-error" : ""}`;
+      const icon = type === "error" ? "fa-circle-xmark" : "fa-circle-check";
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add("toast-closing");
+        setTimeout(() => toast.remove(), 1000);
+      }, 3000);
+    }
+
+    // ── GERÇEK TARAYICI BİLDİRİMİ (Sistem Bildirimi) ─────────────────
+    async function requestNotificationPermission() {
+      if (!("Notification" in window)) return false;
+      if (Notification.permission === "granted") return true;
+      if (Notification.permission === "denied") return false;
+
+      const permission = await Notification.requestPermission();
+      return permission === "granted";
+    }
+
+    async function sendBrowserNotification(title, body, icon) {
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission) return;
+
+      try {
+        new Notification(title, {
+          body,
+          icon: icon || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100",
+          badge: icon || undefined
+        });
+      } catch (err) {
+        console.warn("Bildirim gösterilemedi:", err);
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     function closeOverlays() {
-      els.newsOverlay.classList.remove("active");
-      els.searchOverlay.classList.remove("active");
-      els.authOverlay.classList.remove("active");
-      document.body.classList.remove("modal-open");
+      const activeOverlays = [els.newsOverlay, els.searchOverlay, els.authOverlay].filter(el => el.classList.contains("active"));
+
+      if (activeOverlays.length === 0) return;
+
+      activeOverlays.forEach(el => el.classList.add("closing"));
+
+      setTimeout(() => {
+        activeOverlays.forEach(el => {
+          el.classList.remove("active");
+          el.classList.remove("closing");
+        });
+        document.body.classList.remove("modal-open");
+      }, 1000);
     }
 
     els.commentForm.addEventListener("submit", (event) => {
@@ -1826,27 +1967,43 @@
         return;
       }
 
-      const comments = getComments();
-      const key = String(activeNewsId);
-      comments[key] = comments[key] || [];
-      comments[key].unshift({
-        id: Date.now(),
-        name,
-        username: user ? user.username : "",
-        text,
-        date: new Date().toLocaleString("tr-TR", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
-        })
-      });
-      setComments(comments);
-      els.commentForm.reset();
-      els.commentName.value = user ? user.username : "";
-      els.commentError.classList.remove("active");
-      renderComments(activeNewsId);
+      // Gönderme animasyonu
+      const submitBtn = els.commentForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : null;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+      }
+
+      setTimeout(() => {
+        const comments = getComments();
+        const key = String(activeNewsId);
+        comments[key] = comments[key] || [];
+        comments[key].unshift({
+          id: Date.now(),
+          name,
+          username: user ? user.username : "",
+          text,
+          date: new Date().toLocaleString("tr-TR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        });
+        setComments(comments);
+        els.commentForm.reset();
+        els.commentName.value = user ? user.username : "";
+        els.commentError.classList.remove("active");
+        renderComments(activeNewsId);
+        showToast("Yorumun gönderildi! 💬");
+
+        if (submitBtn && originalBtnHtml) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      }, 500);
     });
 
     // Eşya, hayvan, marka gibi isim OLMAYAN kelimeler (kullanıcı adı olarak kabul edilmez)
@@ -2174,9 +2331,14 @@
     pointer-events: all !important;
   }
   #robitPanel.open { display: flex; animation: robitSlideIn 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  #robitPanel.closing { display: flex; animation: robitSlideOut 1s cubic-bezier(0.34, 1.2, 0.64, 1); }
   @keyframes robitSlideIn {
     from { opacity:0; transform: translateY(16px) scale(0.97); }
     to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+  @keyframes robitSlideOut {
+    from { opacity:1; transform: translateY(0) scale(1); }
+    to   { opacity:0; transform: translateY(16px) scale(0.97); }
   }
 
   .robit-msg {
@@ -2388,14 +2550,22 @@ const robitSend     = document.getElementById("robitSend");
 robitBtn.addEventListener("click", () => {
   robitOpen = !robitOpen;
   robitBtn.classList.toggle("open", robitOpen);
-  robitPanel.classList.toggle("open", robitOpen);
+
   if (robitOpen) {
+    robitPanel.classList.remove("closing");
+    robitPanel.classList.add("open");
     if (robitMessages.children.length === 0) {
       const welcomeText = "Merhaba! Ben Robit 🤖 DakikaDakika'nın teknoloji asistanıyım. Haberler hakkında soru sorabilir, özet isteyebilir veya teknoloji hakkında her şeyi sorabilirsin!";
       const welcomeEl = addRobitMsg("bot", welcomeText);
       addSpeakButton(welcomeEl, welcomeText);
     }
     setTimeout(() => robitInput.focus(), 100);
+  } else {
+    robitPanel.classList.add("closing");
+    setTimeout(() => {
+      robitPanel.classList.remove("open");
+      robitPanel.classList.remove("closing");
+    }, 1000);
   }
 });
 
@@ -2736,6 +2906,8 @@ function addSpeakButton(msgEl, text) {
 // ─────────────────────────────────────────────────────────────────────
 </script>
 <!-- ── ROBİT AI SONU ──────────────────────────────────────────────── -->
+
+  <div id="toastContainer"></div>
 
 </body>
 </html>
