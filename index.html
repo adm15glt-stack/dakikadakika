@@ -21,8 +21,11 @@
       --text: #101828;
       --text-soft: #475467;
       --muted: #8a9bb1;
-      --shadow: 0 12px 34px rgba(16, 24, 40, 0.09);
-      --radius: 8px;
+      --shadow: 0 4px 6px rgba(16, 24, 40, 0.03), 0 12px 28px rgba(16, 24, 40, 0.08);
+      --shadow-hover: 0 8px 12px rgba(16, 24, 40, 0.05), 0 20px 40px rgba(16, 24, 40, 0.12);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 22px;
       --header-height: 64px;
       --nav-height: 52px;
     }
@@ -38,7 +41,8 @@
       --text: #e8ecf4;
       --text-soft: #a8b2c7;
       --muted: #6b7690;
-      --shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 12px 28px rgba(0, 0, 0, 0.35);
+      --shadow-hover: 0 8px 12px rgba(0, 0, 0, 0.25), 0 20px 40px rgba(0, 0, 0, 0.45);
     }
 
     body { transition: background-color 0.4s ease, color 0.4s ease; }
@@ -348,7 +352,7 @@
     }
     .hero-main:hover, .side-card:hover, .news-card:hover, .list-card:hover {
       border-color: rgba(20, 95, 232, 0.45);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-hover);
       transform: translateY(-6px) scale(1.02);
     }
     .hero-main {
@@ -1632,9 +1636,14 @@
       }
     }
 
+    // *kelime* → <strong>kelime</strong> (WhatsApp tarzı kalın yazı)
+    function applyBoldMarkdown(escapedText) {
+      return escapedText.replace(/\*([^*\n]+)\*/g, "<strong>$1</strong>");
+    }
+
     function contentToHtml(content) {
       const paragraphs = Array.isArray(content) ? content : [content];
-      return paragraphs.map((text) => `<p>${cleanText(text)}</p>`).join("");
+      return paragraphs.map((text) => `<p>${applyBoldMarkdown(cleanText(text))}</p>`).join("");
     }
 
     function cardImage(news) {
@@ -1742,7 +1751,7 @@
           <div>
             <div class="small-tag">${cleanText(item.tag)}</div>
             <h3>${cleanText(item.title)}</h3>
-            <p>${cleanText(item.summary)}</p>
+            <p>${applyBoldMarkdown(cleanText(item.summary))}</p>
           </div>
         </article>
       `).join("");

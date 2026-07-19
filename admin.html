@@ -16,8 +16,10 @@
       --text: #101828;
       --soft: #475467;
       --muted: #8a9bb1;
-      --shadow: 0 18px 50px rgba(16, 24, 40, 0.1);
-      --radius: 8px;
+      --shadow: 0 4px 6px rgba(16, 24, 40, 0.03), 0 18px 40px rgba(16, 24, 40, 0.09);
+      --shadow-hover: 0 8px 12px rgba(16, 24, 40, 0.05), 0 24px 50px rgba(16, 24, 40, 0.13);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,9 +103,11 @@
     }
     .card {
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius);
       background: var(--surface);
       overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
     }
     .card-head {
       display: flex;
@@ -137,7 +141,7 @@
     input, textarea, select {
       width: 100%;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
       background: #fff;
       color: var(--text);
       padding: 11px 12px;
@@ -168,10 +172,12 @@
       gap: 8px;
       min-height: 40px;
       border: 1px solid transparent;
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
       padding: 9px 13px;
       font-weight: 800;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.15s ease;
     }
+    .btn:hover { transform: translateY(-1px); }
     .btn.primary {
       background: var(--accent);
       color: #fff;
@@ -776,12 +782,16 @@
                 <div class="field full">
                   <label for="content">Haber metni</label>
                   <textarea id="content" required placeholder="Paragrafları boş satırla ayırabilirsin."></textarea>
+                  <div class="hint">Kalın yazı için *kelime* şeklinde yıldız içine al (örn: *önemli* → <strong>önemli</strong>)</div>
                 </div>
               </div>
 
               <div class="actions">
                 <button class="btn primary" type="submit" id="saveBtn">Haberi siteye gönder</button>
                 <button class="btn secondary" type="button" id="previewBtn">Önizlemeyi güncelle</button>
+                <button class="btn secondary" type="button" id="whatsappPublishBtn" style="background:#25D366;color:#fff;border-color:#25D366;">
+                  <i class="fa-brands fa-whatsapp"></i> WhatsApp'a Paylaş ve Yayınla
+                </button>
               </div>
               <div class="status success" id="successMsg">Haber kaydedildi. Ana siteyi yenilediğinde haber görünecek.</div>
               <div class="status error" id="errorMsg">Lütfen zorunlu alanları doldur.</div>
@@ -1108,11 +1118,26 @@
       };
     }
 
+    // Güvenlik için HTML karakterlerini kaçır
+    function escapeHtmlPreview(text) {
+      return String(text || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // *kelime* → <strong>kelime</strong> (WhatsApp tarzı kalın yazı)
+    function applyBoldMarkdownPreview(escapedText) {
+      return escapedText.replace(/\*([^*\n]+)\*/g, "<strong>$1</strong>");
+    }
+
     function updatePreview() {
       els.previewImage.src = validImageUrl(els.image.value);
       els.previewTag.textContent = els.tag.value.trim() || CATEGORY_LABELS[els.category.value];
-      els.previewTitle.textContent = els.title.value.trim() || "Başlık burada görünecek";
-      els.previewSummary.textContent = els.summary.value.trim() || "Kısa özet burada görünecek.";
+      els.previewTitle.innerHTML = applyBoldMarkdownPreview(escapeHtmlPreview(els.title.value.trim() || "Başlık burada görünecek"));
+      els.previewSummary.innerHTML = applyBoldMarkdownPreview(escapeHtmlPreview(els.summary.value.trim() || "Kısa özet burada görünecek."));
     }
 
     function resetForm() {
@@ -1292,6 +1317,44 @@
     els.newsForm.addEventListener("submit", saveNews);
     document.getElementById("previewBtn").addEventListener("click", updatePreview);
     document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+    // ── WHATSAPP'A PAYLAŞ + OTOMATİK YAYINLA ─────────────────────────
+    document.getElementById("whatsappPublishBtn").addEventListener("click", () => {
+      const item = buildNewsFromForm();
+      if (!item) {
+        showStatus(els.errorMsg, "Lütfen başlık, özet ve haber metnini doldur.");
+        return;
+      }
+
+      // Haberi kaydet (siteye yayınla)
+      const news = getNews();
+      if (editingIndex === null) {
+        item.id = Date.now();
+        news.unshift(item);
+      } else {
+        item.id = news[editingIndex].id || Date.now();
+        news[editingIndex] = item;
+      }
+      setNews(news);
+      renderNewsList();
+      renderCommentList();
+      renderUserList();
+
+      // WhatsApp paylaşım linkini oluştur
+      const siteUrl = window.location.origin + window.location.pathname.replace("admin.html", "index.html");
+      const shareUrl = `${siteUrl}?haber=${item.id}`;
+      const shareText = `${item.title}\n\n${item.summary}\n\n${shareUrl}`;
+      const whatsappLink = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+      showStatus(els.successMsg, "Haber yayınlandı! WhatsApp paylaşım penceresi açılıyor...");
+
+      // Kısa bir gecikmeyle WhatsApp'ı aç (kullanıcı önce mesajı görsün)
+      setTimeout(() => {
+        window.open(whatsappLink, "_blank", "noopener,noreferrer");
+        resetForm();
+      }, 600);
+    });
+    // ─────────────────────────────────────────────────────────────────
 
     els.category.addEventListener("change", () => {
       els.tag.value = CATEGORY_LABELS[els.category.value];
